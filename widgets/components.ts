@@ -3,23 +3,25 @@
  *
  * The type below makes this registry complete and correct: every name in
  * definitions.ts needs an entry, and each Component must accept exactly the
- * arguments its schema produces.
+ * arguments its schema produces and the state its state schema describes.
  */
 import type { ComponentType } from "react"
 import type { z } from "zod"
 import { Checklist, ChecklistPending } from "./checklist/component"
 import { ChecklistSkeleton } from "./checklist/skeleton"
+import type { WidgetDefinition, WidgetProps } from "./define"
 import type { definitions, WidgetName } from "./definitions"
 import { FactCard, FactCardPending } from "./fact-card/component"
 import { FactCardSkeleton } from "./fact-card/skeleton"
 
-type ArgsOf<N extends WidgetName> = z.infer<
-  Extract<(typeof definitions)[number], { name: N }>["schema"]
->
+type DefinitionOf<N extends WidgetName> = Extract<(typeof definitions)[number], { name: N }>
+type ArgsOf<N extends WidgetName> = z.infer<DefinitionOf<N>["schema"]>
+type StateOf<N extends WidgetName> =
+  DefinitionOf<N> extends WidgetDefinition<string, z.ZodObject, infer S> ? z.infer<S> : never
 
-export type WidgetEntry<Args> = {
-  /** The finished widget, given validated arguments. */
-  Component: ComponentType<Args>
+export type WidgetEntry<Args, State> = {
+  /** The finished widget, given validated arguments and its current state. */
+  Component: ComponentType<WidgetProps<Args, State>>
   /**
    * The widget while its arguments stream, given whatever has been parsed so
    * far. `partial` is unvalidated, so it's typed unknown: read it
@@ -32,7 +34,7 @@ export type WidgetEntry<Args> = {
   Skeleton?: ComponentType
 }
 
-export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>> } = {
+export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>, StateOf<N>> } = {
   show_checklist: { Component: Checklist, Pending: ChecklistPending, Skeleton: ChecklistSkeleton },
   show_fact_card: { Component: FactCard, Pending: FactCardPending, Skeleton: FactCardSkeleton },
 }
@@ -42,8 +44,8 @@ export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>> } = {
  * type above ties each component to its schema, and the caller validates args
  * with that same schema before rendering.
  */
-export function getComponents(name: string): WidgetEntry<Record<string, unknown>> | undefined {
+export function getComponents(name: string): WidgetEntry<Record<string, unknown>, unknown> | undefined {
   return Object.hasOwn(components, name)
-    ? (components[name as WidgetName] as unknown as WidgetEntry<Record<string, unknown>>)
+    ? (components[name as WidgetName] as unknown as WidgetEntry<Record<string, unknown>, unknown>)
     : undefined
 }

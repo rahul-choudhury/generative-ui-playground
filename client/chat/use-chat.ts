@@ -1,14 +1,31 @@
 import { useCallback, useRef, useState } from "react"
-import type { Message, Part, StreamEvent, TextPart, Usage, WidgetPart } from "../../shared/protocol"
+import type {
+  Message,
+  Part,
+  StreamEvent,
+  TextPart,
+  Usage,
+  WidgetPart,
+  WidgetStatePart,
+} from "../../shared/protocol"
+import { getDefinition } from "../../widgets/definitions"
+import { validateWidget } from "../../widgets/validate"
 import { readNdjson } from "./read-ndjson"
 
 /**
- * A widget part plus the raw argument text received so far. argsText is what
- * the partial view renders from while args is still undefined; it's
- * client-only and stripped before history is sent.
+ * A widget part plus client-only fields, all stripped before history is sent:
+ * - argsText: raw argument text so far (the pending view renders from it)
+ * - state: current interactive state; undefined means "still initial"
+ * - reportedState: the state as of the last message that reported it
  */
-export type ClientWidgetPart = WidgetPart & { argsText?: string }
-export type ClientPart = TextPart | ClientWidgetPart
+export type ClientWidgetPart = WidgetPart & {
+  argsText?: string
+  state?: unknown
+  reportedState?: unknown
+}
+/** A state snapshot plus how the change read, shown under the user's message. */
+export type ClientWidgetStatePart = WidgetStatePart & { summary?: string }
+export type ClientPart = TextPart | ClientWidgetPart | ClientWidgetStatePart
 
 /** Client-only fields on top of the wire Message. Never sent to the server. */
 export type ChatMessage = Omit<Message, "parts"> & {
@@ -33,10 +50,14 @@ export function useChat() {
       const content = text.trim()
       if (!content || abortRef.current) return
 
+      // Widgets the user changed since their last message ride along as
+      // snapshots; the server turns them into a note for the model.
+      const snapshots = collectSnapshots(messages)
+
       const user: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
-        parts: [{ type: "text", text: content }],
+        parts: [...snapshots.map((s) => s.part), { type: "text", text: content }],
         status: "done",
       }
       const assistant: ChatMessage = {
@@ -52,7 +73,19 @@ export function useChat() {
         .filter((m) => m.status !== "error" && m.parts.length > 0)
         .map(({ id, role, parts }) => ({ id, role, parts: parts.map(toWirePart) }))
 
-      setMessages((prev) => [...prev, user, assistant])
+      // Mark what was just reported, so the next message only sends changes
+      // made after this one.
+      const reported = new Map(snapshots.map((s) => [s.part.widgetId, s.part.state]))
+      setMessages((prev) => [
+        ...prev.map((m) => ({
+          ...m,
+          parts: m.parts.map((p) =>
+            p.type === "widget" && reported.has(p.id) ? { ...p, reportedState: reported.get(p.id) } : p
+          ),
+        })),
+        user,
+        assistant,
+      ])
 
       const controller = new AbortController()
       abortRef.current = controller
@@ -131,14 +164,69 @@ export function useChat() {
 
   const stop = useCallback(() => abortRef.current?.abort(), [])
 
-  return { messages, isStreaming, send, stop }
+  /** Called by interactive widgets (e.g. a tick). Widget ids are unique. */
+  const setWidgetState = useCallback((widgetId: string, state: unknown) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.parts.some((p) => p.type === "widget" && p.id === widgetId)
+          ? {
+              ...m,
+              parts: m.parts.map((p) => (p.type === "widget" && p.id === widgetId ? { ...p, state } : p)),
+            }
+          : m
+      )
+    )
+  }, [])
+
+  return { messages, isStreaming, send, stop, setWidgetState }
+}
+
+/**
+ * One snapshot per interactive widget whose state differs from what was last
+ * reported (or from its initial state, if never reported). Ticking and then
+ * unticking the same item cancels out, so no snapshot is sent.
+ */
+function collectSnapshots(messages: ChatMessage[]) {
+  const snapshots: { part: ClientWidgetStatePart }[] = []
+
+  for (const message of messages) {
+    for (const part of message.parts) {
+      if (part.type !== "widget" || part.state === undefined) continue
+      const config = getDefinition(part.name)?.state
+      const result = validateWidget(part.name, part.args)
+      if (!config || result.status !== "ok") continue
+
+      const before = part.reportedState ?? config.initial(result.data)
+      if (JSON.stringify(before) === JSON.stringify(part.state)) continue
+
+      snapshots.push({
+        part: {
+          type: "widget-state",
+          widgetId: part.id,
+          state: part.state,
+          // Same wording the server will give the model, shown to the user.
+          summary: config.describeChange(result.data, before, part.state) ?? undefined,
+        },
+      })
+    }
+  }
+  return snapshots
 }
 
 /** Drop client-only fields (argsText can be kilobytes per widget). */
 function toWirePart(part: ClientPart): Part {
-  if (part.type !== "widget") return part
-  const { argsText: _, ...wire } = part
-  return wire
+  switch (part.type) {
+    case "widget": {
+      const { argsText: _a, state: _s, reportedState: _r, ...wire } = part
+      return wire
+    }
+    case "widget-state": {
+      const { summary: _, ...wire } = part
+      return wire
+    }
+    default:
+      return part
+  }
 }
 
 /** Append to the trailing text part, or start a new one. */

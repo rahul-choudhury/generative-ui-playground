@@ -1,3 +1,4 @@
+import { ListChecksIcon } from "@phosphor-icons/react"
 import { cn } from "@rahul-choudhury/ui"
 import Markdown from "react-markdown"
 import rehypeHighlight from "rehype-highlight"
@@ -7,11 +8,25 @@ import { WidgetView } from "./widget-view"
 
 export function Message({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
+    // Widget changes this message reported to the model, in the same words
+    // the model receives, so what it "knows" is never hidden from the user.
+    const reported = message.parts.flatMap((part) =>
+      part.type === "widget-state" && part.summary ? [part.summary] : []
+    )
     return (
-      <div className="flex justify-end">
+      <div className="flex flex-col items-end gap-1.5">
         <div className="max-w-[85%] rounded-lg bg-surface-soft px-4 py-2.5 text-[15px] leading-7 whitespace-pre-wrap wrap-break-word">
           {message.parts.map((part) => (part.type === "text" ? part.text : null))}
         </div>
+        {reported.map((summary) => (
+          <p key={summary} className="flex max-w-[85%] items-start gap-1.5 text-xs text-text-muted">
+            <ListChecksIcon size={14} className="mt-px shrink-0" aria-hidden />
+            <span>
+              <span className="sr-only">Also sent: </span>
+              {summary}
+            </span>
+          </p>
+        ))}
       </div>
     )
   }
@@ -62,6 +77,8 @@ function PartView({ part, isStreaming }: { part: ClientPart; isStreaming: boolea
           </Markdown>
         </div>
       )
+    case "widget-state":
+      return null // only on user messages, which render it as a note
   }
 }
 

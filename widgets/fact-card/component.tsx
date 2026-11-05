@@ -1,14 +1,17 @@
 import { cn } from "@rahul-choudhury/ui"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
+import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
 import type { FactCardArgs } from "./definition"
 
 /**
  * An almanac entry rather than a dashboard tile: serif name with an italic
  * descriptor, one headline figure set large, and facts joined to their values
- * by dotted leaders, like an index or a reference book's table.
+ * by dotted leaders, like an index or a reference book's table. Read-only:
+ * it has no state.
  */
-export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCardArgs) {
+export function FactCard({ args }: WidgetProps<FactCardArgs, undefined>) {
+  const { subject, descriptor, headline, facts, asOf } = args
   return (
     <FactCardLayout
       subject={subject}

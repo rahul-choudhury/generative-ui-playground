@@ -24,7 +24,24 @@ export const WidgetPartSchema = z.object({
   args: z.unknown().optional(),
 })
 
-export const PartSchema = z.discriminatedUnion("type", [TextPartSchema, WidgetPartSchema])
+/**
+ * Sent on a user message: the current state of a widget the user interacted
+ * with since their last message (e.g. a checklist's ticks). `widgetId` is the
+ * widget part's id. The server compares it with the previous snapshot (or the
+ * widget's initial state) and tells the model what changed. Not validated
+ * here: the server checks it against the widget's state schema.
+ */
+export const WidgetStatePartSchema = z.object({
+  type: z.literal("widget-state"),
+  widgetId: z.string(),
+  state: z.unknown(),
+})
+
+export const PartSchema = z.discriminatedUnion("type", [
+  TextPartSchema,
+  WidgetPartSchema,
+  WidgetStatePartSchema,
+])
 
 export const MessageSchema = z.object({
   id: z.string(),
@@ -38,6 +55,7 @@ export const ChatRequestSchema = z.object({
 
 export type TextPart = z.infer<typeof TextPartSchema>
 export type WidgetPart = z.infer<typeof WidgetPartSchema>
+export type WidgetStatePart = z.infer<typeof WidgetStatePartSchema>
 export type Part = z.infer<typeof PartSchema>
 export type Message = z.infer<typeof MessageSchema>
 export type ChatRequest = z.infer<typeof ChatRequestSchema>

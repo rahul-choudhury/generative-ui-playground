@@ -92,3 +92,73 @@ describe("toOpenAIInput", () => {
     expect(outputs).toEqual(calls)
   })
 })
+
+describe("toOpenAIInput: widget state events", () => {
+  const twoItems = {
+    title: "Packing",
+    items: [
+      { label: "Passport", checked: false },
+      { label: "Charger", checked: false },
+    ],
+  }
+  const listWidget = assistant({ type: "widget", id: "w1", name: "show_checklist", args: twoItems })
+  const userWith = (text: string, ...states: unknown[]): Message => ({
+    id: crypto.randomUUID(),
+    role: "user",
+    parts: [
+      ...states.map((state) => ({ type: "widget-state" as const, widgetId: "w1", state })),
+      { type: "text" as const, text },
+    ],
+  })
+  const contents = (items: ReturnType<typeof toOpenAIInput>) =>
+    items.flatMap((i) => {
+      const content = (i as { content?: unknown }).content
+      return typeof content === "string" ? [content] : []
+    })
+
+  test("a snapshot becomes a note just before the user's text", () => {
+    const items = toOpenAIInput([user("pack list"), listWidget, userWith("what's left?", [true, false])])
+    expect(items.slice(-2)).toEqual([
+      {
+        role: "user",
+        content: [
+          "<widget_events>",
+          "Since your last reply, the user did this in widgets shown earlier:",
+          '- In the checklist "Packing": ticked "Passport". Now 1 of 2 done.',
+          "</widget_events>",
+        ].join("\n"),
+      },
+      { role: "user", content: "what's left?" },
+    ])
+  })
+
+  test("the widget's own output never changes, so earlier history stays cacheable", () => {
+    const before = toOpenAIInput([user("pack list"), listWidget])
+    const after = toOpenAIInput([user("pack list"), listWidget, userWith("done", [true, true])])
+    expect(after.slice(0, before.length)).toEqual(before)
+  })
+
+  test("each snapshot is described relative to the previous one", () => {
+    const items = toOpenAIInput([
+      listWidget,
+      userWith("first", [true, false]),
+      assistant({ type: "text", text: "ok" }),
+      userWith("second", [true, true]),
+    ])
+    const notes = contents(items).filter((c) => c.startsWith("<widget_events>"))
+    expect(notes).toHaveLength(2)
+    expect(notes[0]).toContain('ticked "Passport". Now 1 of 2')
+    expect(notes[1]).toContain('ticked "Charger". Now 2 of 2') // not Passport again
+  })
+
+  test("no change, unknown widgets and invalid snapshots produce no note", () => {
+    for (const message of [
+      userWith("unchanged", [false, false]),
+      userWith("bad shape", "not an array"),
+      { ...userWith("unknown"), parts: [{ type: "widget-state" as const, widgetId: "nope", state: [true] }, { type: "text" as const, text: "unknown" }] },
+    ]) {
+      const items = toOpenAIInput([listWidget, message])
+      expect(contents(items).some((c) => c.startsWith("<widget_events>"))).toBe(false)
+    }
+  })
+})

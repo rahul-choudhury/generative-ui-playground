@@ -1,21 +1,26 @@
 import { cn } from "@rahul-choudhury/ui"
 import { Card, Checkbox, Skeleton } from "@rahul-choudhury/ui/components"
-import { useState } from "react"
 import Markdown from "react-markdown"
+import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
-import type { ChecklistArgs } from "./definition"
+import type { ChecklistArgs, ChecklistState } from "./definition"
 
 /**
- * The finished checklist. Ticking works locally only; step 6 sends ticks back
- * to the conversation.
+ * The finished checklist. Ticks live in the chat (not local state), so they
+ * survive re-renders and reach the model with the user's next message.
  */
-export function Checklist({ title, items }: ChecklistArgs) {
-  const [checked, setChecked] = useState(() => items.map((item) => item.checked))
-
+export function Checklist({ args, state, setState }: WidgetProps<ChecklistArgs, ChecklistState>) {
   const toggle = (index: number, value: boolean) =>
-    setChecked((prev) => prev.map((c, i) => (i === index ? value : c)))
+    setState(state.map((c, i) => (i === index ? value : c)))
 
-  return <ChecklistLayout title={title} labels={items.map((i) => i.label)} checked={checked} onToggle={toggle} />
+  return (
+    <ChecklistLayout
+      title={args.title}
+      labels={args.items.map((i) => i.label)}
+      checked={state}
+      onToggle={toggle}
+    />
+  )
 }
 
 /**

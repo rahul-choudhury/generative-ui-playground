@@ -7,6 +7,7 @@ import { validateWidget } from "../../widgets/validate"
 import type { ClientWidgetPart } from "./use-chat"
 import { WidgetErrorBoundary } from "./widget-error-boundary"
 import { WidgetFallback, WidgetInterrupted } from "./widget-fallback"
+import { useSetWidgetState } from "./widget-state-context"
 
 /**
  * Renders any registered widget part through its lifecycle:
@@ -26,6 +27,7 @@ export function WidgetView({ part, isStreaming }: { part: ClientWidgetPart; isSt
     [part.argsText]
   )
 
+  const setWidgetState = useSetWidgetState()
   const definition = getDefinition(part.name)
   const entry = getComponents(part.name)
 
@@ -77,7 +79,13 @@ export function WidgetView({ part, isStreaming }: { part: ClientWidgetPart; isSt
         <WidgetFallback kind="crashed" label={definition.label} error={error} args={part.args} />
       )}
     >
-      <entry.Component {...result.data} />
+      <entry.Component
+        args={result.data}
+        // Interactive widgets start from a state derived from their arguments
+        // until the user changes it.
+        state={part.state ?? definition.state?.initial(result.data)}
+        setState={(next) => setWidgetState(part.id, next)}
+      />
     </WidgetErrorBoundary>
   )
 }

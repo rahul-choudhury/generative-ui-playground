@@ -11,9 +11,27 @@ import { z } from "zod"
  */
 export const text = () => z.string().trim().min(1)
 
+/**
+ * State the user can change by interacting with a widget (e.g. ticks). Kept
+ * by the client, sent as a snapshot with the user's next message, and turned
+ * into words for the model by the server. No React: the server runs it.
+ */
+export type WidgetStateConfig<Args, StateSchema extends z.ZodType> = {
+  /** Validates a snapshot from the client before it's described. */
+  schema: StateSchema
+  /** The state the widget starts in, derived from the model's arguments. */
+  initial: (args: Args) => z.infer<StateSchema>
+  /**
+   * One sentence telling the model what changed, or null if nothing did.
+   * `before` is the last state the model heard about.
+   */
+  describeChange: (args: Args, before: z.infer<StateSchema>, after: z.infer<StateSchema>) => string | null
+}
+
 export type WidgetDefinition<
   Name extends string = string,
   Schema extends z.ZodObject = z.ZodObject,
+  StateSchema extends z.ZodType = z.ZodType,
 > = {
   /** Tool name the model calls, e.g. "show_checklist". Must be unique. */
   name: Name
@@ -23,15 +41,28 @@ export type WidgetDefinition<
   description: string
   /** Arguments the model must send. Also validates them before rendering. */
   schema: Schema
+  /** Only for interactive widgets. */
+  state?: WidgetStateConfig<z.infer<Schema>, StateSchema>
 }
 
 /**
- * Identity function whose only job is inference: it keeps the literal name
- * and the exact schema type, so the component registry can be type-checked
- * against each widget's own arguments.
+ * Identity function whose only job is inference: it keeps the literal name,
+ * the exact argument schema and the state schema, so the component registry
+ * can be type-checked against each widget's own arguments and state. A widget
+ * without `state` gets state type `undefined`.
  */
-export function defineWidget<const Name extends string, Schema extends z.ZodObject>(
-  definition: WidgetDefinition<Name, Schema>
-): WidgetDefinition<Name, Schema> {
+export function defineWidget<
+  const Name extends string,
+  Schema extends z.ZodObject,
+  StateSchema extends z.ZodType = z.ZodUndefined,
+>(definition: WidgetDefinition<Name, Schema, StateSchema>): WidgetDefinition<Name, Schema, StateSchema> {
   return definition
+}
+
+/** Props every finished widget component receives. */
+export type WidgetProps<Args, State> = {
+  args: Args
+  /** Current interactive state (undefined for widgets without state). */
+  state: State
+  setState: (next: State) => void
 }
