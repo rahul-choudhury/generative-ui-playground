@@ -2,6 +2,7 @@
 @import "@rahul-choudhury/ui/tokens.css";
 
 @layer base {
+
   html,
   body,
   #root {
@@ -16,36 +17,180 @@
 /* Markdown inside assistant messages. Uses only the library's tokens. */
 @layer components {
   .markdown {
-    @apply text-[15px] leading-7 break-words;
+    @apply text-[15px] leading-7 wrap-break-word;
 
-    & > :first-child { @apply mt-0; }
-    & > :last-child { @apply mb-0; }
+    &> :first-child {
+      @apply mt-0;
+    }
 
-    & p, & ul, & ol, & pre, & table, & blockquote { @apply my-3; }
-    & h1, & h2, & h3, & h4 { @apply mt-6 mb-2 font-semibold leading-snug; }
-    & h1 { @apply text-xl; }
-    & h2 { @apply text-lg; }
-    & h3, & h4 { @apply text-base; }
+    &> :last-child {
+      @apply mb-0;
+    }
 
-    & ul { @apply list-disc pl-6; }
-    & ol { @apply list-decimal pl-6; }
-    & li { @apply my-1; }
-    & li > ul, & li > ol { @apply my-1; }
+    & p,
+    & ul,
+    & ol,
+    & pre,
+    & table,
+    & blockquote {
+      @apply my-3;
+    }
 
-    & a { @apply underline underline-offset-2 hover:text-text-secondary; }
-    & strong { @apply font-semibold; }
-    & hr { @apply my-6 border-border; }
-    & blockquote { @apply border-l-2 border-border-strong pl-4 text-text-secondary; }
+    & h1,
+    & h2,
+    & h3,
+    & h4 {
+      @apply mt-6 mb-2 font-semibold leading-snug;
+    }
 
-    & :not(pre) > code {
+    & h1 {
+      @apply text-xl;
+    }
+
+    & h2 {
+      @apply text-lg;
+    }
+
+    & h3,
+    & h4 {
+      @apply text-base;
+    }
+
+    & ul {
+      @apply list-disc pl-6;
+    }
+
+    & ol {
+      @apply list-decimal pl-6;
+    }
+
+    & li {
+      @apply my-1;
+    }
+
+    & li>ul,
+    & li>ol {
+      @apply my-1;
+    }
+
+    & a {
+      @apply underline underline-offset-2 hover:text-text-secondary;
+    }
+
+    & strong {
+      @apply font-semibold;
+    }
+
+    & hr {
+      @apply my-6 border-border;
+    }
+
+    & blockquote {
+      @apply border-l-2 border-border-strong pl-4 text-text-secondary;
+    }
+
+    & :not(pre)>code {
       @apply rounded-sm bg-surface-soft px-1.5 py-0.5 font-mono text-[0.875em];
     }
+
     & pre {
       @apply overflow-x-auto rounded-md border border-border bg-surface p-4 font-mono text-[13px] leading-6;
     }
 
-    & table { @apply block w-full overflow-x-auto border-collapse text-sm; }
-    & th, & td { @apply border border-border px-3 py-1.5 text-left; }
-    & th { @apply bg-surface-soft font-semibold; }
+    & table {
+      @apply block w-full overflow-x-auto border-collapse text-sm;
+    }
+
+    & th,
+    & td {
+      @apply border border-border px-3 py-1.5 text-left;
+    }
+
+    & th {
+      @apply bg-surface-soft font-semibold;
+    }
+  }
+}
+
+/*
+ * Syntax highlighting: GitHub's light and dark highlight.js themes
+ * (highlight.js/styles/github.css + github-dark.css), paired with
+ * light-dark() exactly like the library's tokens, so code follows
+ * data-theme and the OS preference. Plain code text, emphasis and
+ * substitutions use the library's own `text` colour instead of GitHub's.
+ */
+@theme {
+  --color-syntax-keyword: light-dark(#d73a49, #ff7b72);
+  --color-syntax-title: light-dark(#6f42c1, #d2a8ff);
+  --color-syntax-constant: light-dark(#005cc5, #79c0ff);
+  --color-syntax-string: light-dark(#032f62, #a5d6ff);
+  --color-syntax-builtin: light-dark(#e36209, #ffa657);
+  --color-syntax-comment: light-dark(#6a737d, #8b949e);
+  --color-syntax-tag: light-dark(#22863a, #7ee787);
+  --color-syntax-section: light-dark(#005cc5, #1f6feb);
+  --color-syntax-bullet: light-dark(#735c0f, #f2cc60);
+  --color-syntax-addition: light-dark(#22863a, #aff5b4);
+  --color-syntax-addition-bg: light-dark(#f0fff4, #033a16);
+  --color-syntax-deletion: light-dark(#b31d28, #ffdcd7);
+  --color-syntax-deletion-bg: light-dark(#ffeef0, #67060c);
+}
+
+@layer components {
+  .markdown pre code {
+    & :is(.hljs-doctag, .hljs-keyword, .hljs-meta .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_) {
+      @apply text-syntax-keyword;
+    }
+
+    & :is(.hljs-title, .hljs-title.class_, .hljs-title.function_) {
+      @apply text-syntax-title;
+    }
+
+    & :is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id) {
+      @apply text-syntax-constant;
+    }
+
+    & :is(.hljs-regexp, .hljs-string, .hljs-meta .hljs-string) {
+      @apply text-syntax-string;
+    }
+
+    & :is(.hljs-built_in, .hljs-symbol) {
+      @apply text-syntax-builtin;
+    }
+
+    & :is(.hljs-comment, .hljs-code, .hljs-formula) {
+      @apply text-syntax-comment;
+    }
+
+    & :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) {
+      @apply text-syntax-tag;
+    }
+
+    & .hljs-section {
+      @apply font-bold text-syntax-section;
+    }
+
+    & .hljs-bullet {
+      @apply text-syntax-bullet;
+    }
+
+    & .hljs-subst {
+      @apply text-text;
+    }
+
+    & .hljs-emphasis {
+      @apply text-text italic;
+    }
+
+    & .hljs-strong {
+      @apply text-text font-bold;
+    }
+
+    & .hljs-addition {
+      @apply bg-syntax-addition-bg text-syntax-addition;
+    }
+
+    & .hljs-deletion {
+      @apply bg-syntax-deletion-bg text-syntax-deletion;
+    }
   }
 }
