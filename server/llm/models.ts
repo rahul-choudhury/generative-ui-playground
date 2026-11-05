@@ -19,7 +19,7 @@ type Rates = {
   output: number // reasoning tokens are billed as output
 }
 
-type Tier = "standard" | "flex" | "fast"
+type Tier = "standard" | "flex" | "fast" | "ultrafast"
 
 type ModelInfo = {
   maxInputTokens: number
@@ -67,6 +67,30 @@ const MODELS: Record<string, ModelInfo> = {
       },
     },
   },
+  // https://developers.openai.com/api/docs/models/gpt-6.1-sol, checked
+  // 2026-11-06. 2× Terra, 20× Luna; the only one offered on Ultrafast.
+  "gpt-6.1-sol": {
+    maxInputTokens: 922_000, // context window is 1,050,000 incl. 128,000 output
+    longContextThreshold: 272_000,
+    tiers: {
+      standard: {
+        short: { input: 2.0, cachedInput: 0.1, cacheWrite30m: 2.5, cacheWrite12h: 5.0, output: 10.0 },
+        long: { input: 4.0, cachedInput: 0.2, cacheWrite30m: 5.0, cacheWrite12h: 10.0, output: 15.0 },
+      },
+      flex: {
+        short: { input: 1.0, cachedInput: 0.05, cacheWrite30m: 1.25, cacheWrite12h: 2.5, output: 5.0 },
+        long: { input: 2.0, cachedInput: 0.1, cacheWrite30m: 2.5, cacheWrite12h: 5.0, output: 7.5 },
+      },
+      fast: {
+        short: { input: 4.0, cachedInput: 0.2, cacheWrite30m: 5.0, cacheWrite12h: 10.0, output: 20.0 },
+        long: { input: 8.0, cachedInput: 0.4, cacheWrite30m: 10.0, cacheWrite12h: 20.0, output: 30.0 },
+      },
+      ultrafast: {
+        short: { input: 12.0, cachedInput: 0.6, cacheWrite30m: 15.0, cacheWrite12h: 30.0, output: 60.0 },
+        long: { input: 24.0, cachedInput: 1.2, cacheWrite30m: 30.0, cacheWrite12h: 60.0, output: 90.0 },
+      },
+    },
+  },
 }
 
 /** OpenAI's reported service_tier → our price table's tier. */
@@ -79,8 +103,10 @@ function toTier(serviceTier: Response["service_tier"]): Tier | null {
     case "priority": // renamed to "fast" on 2026-07-30
     case "fast":
       return "fast"
+    case "ultrafast":
+      return "ultrafast"
     default:
-      return null // scale, ultrafast, unknown → don't guess
+      return null // scale, unknown → don't guess
   }
 }
 
