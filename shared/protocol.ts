@@ -67,7 +67,19 @@ export const MessageSchema = z.object({
 
 export const ChatRequestSchema = z.object({
   messages: z.array(MessageSchema).min(1),
+  /** One of GET /api/models; omitted means the server's default. */
+  model: z.string().optional(),
 })
+
+/** GET /api/models: what the model selector offers. */
+export type ModelOption = {
+  id: string
+  label: string
+  /** Standard-tier USD per 1M tokens, for the selector's price hint. */
+  inputPerMillion: number | null
+  outputPerMillion: number | null
+}
+export type ModelsResponse = { models: ModelOption[]; default: string }
 
 export type TextPart = z.infer<typeof TextPartSchema>
 export type ToolResult = z.infer<typeof ToolResultSchema>
@@ -96,6 +108,8 @@ export type Usage = {
   costUsd: number | null
   /** Pricing tier the provider says it used, e.g. "standard". */
   serviceTier: string | null
+  /** The model that produced this response, as the provider reports it. */
+  model: string
   /** Most input tokens one request can take; null if the model is unknown. */
   maxInputTokens: number | null
   /** Input size above which the whole request is billed at long-context rates. */

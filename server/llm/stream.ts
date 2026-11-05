@@ -10,7 +10,7 @@ import { validateWidget } from "../../widgets/validate"
 import { hasResolver, resolveWidget } from "../widgets/resolvers"
 import { toOpenAIInput, widgetOutput } from "./history"
 import { toUsage } from "./models"
-import { model, openai, reasoningEffort } from "./openai"
+import { model as defaultModel, openai, reasoningEffort } from "./openai"
 import { toolsExcept } from "./tools"
 import { systemPrompt } from "./system-prompt"
 
@@ -31,10 +31,17 @@ export type DataSource = {
 
 const liveData: DataSource = { hasResolver, resolveWidget }
 
+export type StreamOptions = {
+  /** Where data widgets get their data (evals pass fixed data). */
+  data?: DataSource
+  /** Which model to use; must already be validated. Defaults to OPENAI_MODEL. */
+  model?: string
+}
+
 export async function* streamChat(
   messages: Message[],
   signal: AbortSignal,
-  data: DataSource = liveData
+  { data = liveData, model = defaultModel }: StreamOptions = {}
 ): AsyncGenerator<StreamEvent> {
   try {
     let input = toOpenAIInput(messages)
@@ -51,7 +58,7 @@ export async function* streamChat(
 
     for (let pass = 1; pass <= 2; pass++) {
       const available = toolsExcept((name) => excluded(name, pass))
-      const outcome = yield* streamPass(input, { signal, tools: available, data })
+      const outcome = yield* streamPass(input, { signal, tools: available, data, model })
       if (outcome.kind === "stopped") return // error already reported
 
       // Wait for any data still being fetched, and send it to the client.
@@ -105,7 +112,7 @@ type PassOutcome =
 /** One model request, streamed as our events. */
 async function* streamPass(
   input: ResponseInputItem[],
-  { signal, tools, data }: { signal: AbortSignal; tools: FunctionTool[]; data: DataSource }
+  { signal, tools, data, model }: { signal: AbortSignal; tools: FunctionTool[]; data: DataSource; model: string }
 ): AsyncGenerator<StreamEvent, PassOutcome> {
   const stream = await openai.responses.create(
     {

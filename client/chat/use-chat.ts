@@ -37,9 +37,13 @@ export type ChatMessage = Omit<Message, "parts"> & {
   usage?: Usage[]
 }
 
-export function useChat() {
+/** `model`: which model answers the next message (undefined → server default). */
+export function useChat(model?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const abortRef = useRef<AbortController | null>(null)
+  // Read at send time, so switching models never recreates `send`.
+  const modelRef = useRef(model)
+  modelRef.current = model
   const isStreaming = messages.at(-1)?.status === "streaming"
 
   /** Apply a change to the assistant message currently being streamed. */
@@ -104,7 +108,7 @@ export function useChat() {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history }),
+          body: JSON.stringify({ messages: history, model: modelRef.current }),
           signal: controller.signal,
         })
         if (!res.ok || !res.body) {

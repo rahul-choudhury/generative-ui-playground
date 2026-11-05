@@ -37,6 +37,9 @@ export function summarizeUsage(messages: ChatMessage[]) {
     maxInputTokens: latest?.maxInputTokens ?? null,
     longContextThreshold: latest?.longContextThreshold ?? null,
     serviceTier: latest?.serviceTier ?? null,
+    // Models can be switched mid-conversation: say which one replied last.
+    lastModel: latest?.model ?? null,
+    modelCount: new Set(all.map((u) => u.model)).size,
     totals,
     unpricedCount,
     // Stopped replies are billed by OpenAI but report no usage.

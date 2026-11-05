@@ -160,7 +160,7 @@ async function runTurn(messages: Message[], timeoutMs: number): Promise<TurnOutc
   const started = performance.now()
   const signal = AbortSignal.timeout(timeoutMs)
   try {
-    for await (const event of streamChat(messages, signal, fixedData)) apply(event)
+    for await (const event of streamChat(messages, signal, { data: fixedData })) apply(event)
   } catch (e) {
     error = signal.aborted ? `timed out after ${timeoutMs / 1000}s` : String(e)
   }

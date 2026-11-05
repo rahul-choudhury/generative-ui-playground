@@ -25,7 +25,7 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
   const notCounted = s.stoppedCount + s.unpricedCount
 
   return (
-    <div className="mx-auto flex w-full max-w-(--layout-container) justify-end px-4 pb-1.5">
+    <div className="ml-auto">
       <Popover>
         <PopoverTrigger
           className={cn(
@@ -91,7 +91,7 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
             </div>
           </Section>
 
-          {(notCounted > 0 || s.serviceTier) && (
+          {(notCounted > 0 || s.serviceTier || s.lastModel) && (
             <div className="mt-3 flex flex-col gap-1 text-xs text-text-muted">
               {s.stoppedCount > 0 && (
                 <p>
@@ -103,6 +103,12 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
                 <p>
                   {s.unpricedCount} {s.unpricedCount === 1 ? "reply" : "replies"} on an
                   unpriced model or tier not counted.
+                </p>
+              )}
+              {s.lastModel && (
+                <p>
+                  Last reply: <span className="font-mono">{s.lastModel}</span>
+                  {s.modelCount > 1 && ` (this conversation used ${s.modelCount} models)`}.
                 </p>
               )}
               {s.serviceTier && <p>Priced at OpenAI {s.serviceTier} rates.</p>}

@@ -1,5 +1,5 @@
 import type { Response, ResponseUsage } from "openai/resources/responses/responses"
-import type { Usage } from "../../shared/protocol"
+import type { ModelOption, Usage } from "../../shared/protocol"
 
 /**
  * Hand-maintained model limits and prices. OpenAI's API exposes neither, so
@@ -22,6 +22,8 @@ type Rates = {
 type Tier = "standard" | "flex" | "fast" | "ultrafast"
 
 type ModelInfo = {
+  /** Shown in the model selector. */
+  label: string
   maxInputTokens: number
   /** Above this many input tokens, the ENTIRE request uses `long` rates. */
   longContextThreshold: number
@@ -30,6 +32,7 @@ type ModelInfo = {
 
 const MODELS: Record<string, ModelInfo> = {
   "gpt-6-luna": {
+    label: "GPT-6 Luna",
     maxInputTokens: 922_000, // context window is 1,050,000 incl. 128,000 output
     longContextThreshold: 272_000,
     tiers: {
@@ -50,6 +53,7 @@ const MODELS: Record<string, ModelInfo> = {
   // https://developers.openai.com/api/docs/models/gpt-6.1-terra, checked
   // 2026-11-06. ~10× Luna; note cached input is 95% off here, not 90%.
   "gpt-6.1-terra": {
+    label: "GPT-6.1 Terra",
     maxInputTokens: 922_000, // context window is 1,050,000 incl. 128,000 output
     longContextThreshold: 272_000,
     tiers: {
@@ -70,6 +74,7 @@ const MODELS: Record<string, ModelInfo> = {
   // https://developers.openai.com/api/docs/models/gpt-6.1-sol, checked
   // 2026-11-06. 2× Terra, 20× Luna; the only one offered on Ultrafast.
   "gpt-6.1-sol": {
+    label: "GPT-6.1 Sol",
     maxInputTokens: 922_000, // context window is 1,050,000 incl. 128,000 output
     longContextThreshold: 272_000,
     tiers: {
@@ -166,7 +171,26 @@ export function toUsage(response: Response): Usage | null {
     reasoningTokens: reasoning,
     costUsd,
     serviceTier: tier,
+    model: response.model,
     maxInputTokens: model?.maxInputTokens ?? null,
     longContextThreshold: model?.longContextThreshold ?? null,
   }
 }
+
+/**
+ * The models the UI may pick: only priced ones, so every reply's cost can
+ * be shown. The server rejects any other model name from the client.
+ */
+export function listModels(): ModelOption[] {
+  return Object.entries(MODELS).map(([id, info]) => {
+    const standard = info.tiers.standard?.short
+    return {
+      id,
+      label: info.label,
+      inputPerMillion: standard?.input ?? null,
+      outputPerMillion: standard?.output ?? null,
+    }
+  })
+}
+
+export const isSelectableModel = (id: string) => Object.hasOwn(MODELS, id)
