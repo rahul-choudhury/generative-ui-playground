@@ -1,4 +1,6 @@
-import { Card } from "@rahul-choudhury/ui/components"
+import { cn } from "@rahul-choudhury/ui"
+import { Card, Skeleton } from "@rahul-choudhury/ui/components"
+import { asArray, asObject, asString } from "../partial"
 import type { FactCardArgs } from "./definition"
 
 /**
@@ -8,6 +10,61 @@ import type { FactCardArgs } from "./definition"
  */
 export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCardArgs) {
   return (
+    <FactCardLayout
+      subject={subject}
+      descriptor={descriptor}
+      headline={headline ?? undefined}
+      facts={facts}
+      asOf={asOf ?? undefined}
+    />
+  )
+}
+
+/**
+ * The card while its arguments stream: name, headline and fact rows fill in
+ * as they arrive. Same layout as the finished card, so nothing moves when the
+ * final arguments land.
+ */
+export function FactCardPending({ partial, interrupted = false }: { partial: unknown; interrupted?: boolean }) {
+  const args = asObject(partial)
+  const headline = asObject(args.headline)
+  const headlineValue = asString(headline.value)
+
+  return (
+    <FactCardLayout
+      subject={asString(args.subject)}
+      descriptor={asString(args.descriptor)}
+      headline={
+        headlineValue !== undefined ? { value: headlineValue, label: asString(headline.label) } : undefined
+      }
+      // A row appears once its label has a character (no empty-row flash).
+      facts={asArray(args.facts)
+        .map(asObject)
+        .filter((fact) => Boolean(asString(fact.label)))
+        .map((fact) => ({ label: fact.label as string, value: asString(fact.value) }))}
+      asOf={asString(args.asOf)}
+      pending
+      interrupted={interrupted}
+    />
+  )
+}
+
+type LayoutProps = {
+  subject: string | undefined
+  descriptor: string | undefined
+  headline: { value: string; label?: string } | undefined
+  facts: { label: string; value?: string }[]
+  asOf: string | undefined
+  pending?: boolean
+  /** Stopped before finishing: still partial, but no longer loading. */
+  interrupted?: boolean
+}
+
+function FactCardLayout({ subject, descriptor, headline, facts, asOf, pending = false, interrupted = false }: LayoutProps) {
+  // Rows only animate while pending; the finished card mounts without it.
+  const enter = cn(pending && "motion-safe:animate-row-in")
+
+  return (
     <Card
       variant="bordered"
       // Narrower than the chat column: an entry, not a table. Keeps the
@@ -15,24 +72,29 @@ export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCar
       // @container: fact rows adapt to the card's width, not the viewport's.
       className="@container max-w-xl px-5 pt-5 pb-4 sm:px-6"
       role="region"
-      aria-label={`Facts about ${subject}`}
+      aria-label={subject ? `Facts about ${subject}` : "Fact card"}
+      aria-busy={(pending && !interrupted) || undefined}
     >
       <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
         <div className="min-w-0">
-          <h3 className="font-serif text-[2rem] leading-tight font-semibold text-balance">
-            {subject}
-          </h3>
-          <p className="font-serif text-lg leading-snug text-text-muted italic">{descriptor}</p>
+          {subject !== undefined ? (
+            <h3 className="font-serif text-[2rem] leading-tight font-semibold text-balance">{subject}</h3>
+          ) : (
+            <Skeleton className="my-1.5 h-7 w-36" />
+          )}
+          {descriptor !== undefined && (
+            <p className="font-serif text-lg leading-snug text-text-muted italic">{descriptor}</p>
+          )}
         </div>
 
         {headline && (
-          <div className="@sm:text-right">
+          <div className={cn("@sm:text-right", enter)}>
             {/* The serif's digits are lining by default. Proportional (not
                 tabular) spacing: tnum spreads "14.18M" apart at this size. */}
-            <p className="font-serif text-[2.25rem] leading-none">
-              {headline.value}
-            </p>
-            <p className="mt-1.5 text-xs text-text-muted">{headline.label}</p>
+            <p className="font-serif text-[2.25rem] leading-none">{headline.value}</p>
+            {headline.label !== undefined && (
+              <p className="mt-1.5 text-xs text-text-muted">{headline.label}</p>
+            )}
           </div>
         )}
       </header>
@@ -43,7 +105,10 @@ export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCar
           // one line, label …… value. Leaders need room to read as leaders.
           <div
             key={i}
-            className="flex flex-col py-1.5 @sm:flex-row @sm:items-baseline @sm:gap-2 @sm:py-1.25"
+            className={cn(
+              "flex flex-col py-1.5 @sm:flex-row @sm:items-baseline @sm:gap-2 @sm:py-1.25",
+              enter
+            )}
           >
             {/* The leader is the dt's ::after, so the markup stays a valid
                 dt/dd pair and screen readers never see it. Labels don't wrap,
@@ -57,7 +122,9 @@ export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCar
       </dl>
 
       {asOf && (
-        <p className="mt-3 font-serif text-sm text-text-muted italic">Figures as of {asOf}.</p>
+        <p className={cn("mt-3 font-serif text-sm text-text-muted italic", enter)}>
+          Figures as of {asOf}.
+        </p>
       )}
     </Card>
   )

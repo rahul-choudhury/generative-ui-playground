@@ -69,11 +69,16 @@ function copy(props: FallbackProps) {
   }
 }
 
-/** Not an error: the user pressed Stop before the widget finished. */
-export function WidgetInterrupted({ label }: { label: string }) {
+/**
+ * Not an error: the reply stopped before the widget finished. When part of
+ * it is shown above, say it's incomplete; otherwise that nothing arrived.
+ */
+export function WidgetInterrupted({ label, partial }: { label: string; partial: boolean }) {
   return (
     <p className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-text-muted">
-      The {label} was interrupted before it finished.
+      {partial
+        ? `The ${label} above is incomplete: the reply stopped before it finished.`
+        : `The ${label} was interrupted before it finished.`}
     </p>
   )
 }

@@ -1,9 +1,18 @@
 import { useCallback, useRef, useState } from "react"
-import type { Message, StreamEvent, Usage } from "../../shared/protocol"
+import type { Message, Part, StreamEvent, TextPart, Usage, WidgetPart } from "../../shared/protocol"
 import { readNdjson } from "./read-ndjson"
 
+/**
+ * A widget part plus the raw argument text received so far. argsText is what
+ * the partial view renders from while args is still undefined; it's
+ * client-only and stripped before history is sent.
+ */
+export type ClientWidgetPart = WidgetPart & { argsText?: string }
+export type ClientPart = TextPart | ClientWidgetPart
+
 /** Client-only fields on top of the wire Message. Never sent to the server. */
-export type ChatMessage = Message & {
+export type ChatMessage = Omit<Message, "parts"> & {
+  parts: ClientPart[]
   status: "streaming" | "done" | "stopped" | "error"
   error?: string
   /** Assistant messages only; missing when the reply was stopped. */
@@ -41,7 +50,7 @@ export function useChat() {
       // user message. Client-only fields are stripped.
       const history: Message[] = [...messages, user]
         .filter((m) => m.status !== "error" && m.parts.length > 0)
-        .map(({ id, role, parts }) => ({ id, role, parts }))
+        .map(({ id, role, parts }) => ({ id, role, parts: parts.map(toWirePart) }))
 
       setMessages((prev) => [...prev, user, assistant])
 
@@ -71,7 +80,15 @@ export function useChat() {
               }))
               break
             case "tool-call-delta":
-              break // step 5 renders partial arguments; for now wait for the end
+              updateLast((m) => ({
+                ...m,
+                parts: m.parts.map((p) =>
+                  p.type === "widget" && p.id === event.id
+                    ? { ...p, argsText: (p.argsText ?? "") + event.delta }
+                    : p
+                ),
+              }))
+              break
             case "tool-call-end":
               updateLast((m) => ({
                 ...m,
@@ -115,6 +132,13 @@ export function useChat() {
   const stop = useCallback(() => abortRef.current?.abort(), [])
 
   return { messages, isStreaming, send, stop }
+}
+
+/** Drop client-only fields (argsText can be kilobytes per widget). */
+function toWirePart(part: ClientPart): Part {
+  if (part.type !== "widget") return part
+  const { argsText: _, ...wire } = part
+  return wire
 }
 
 /** Append to the trailing text part, or start a new one. */

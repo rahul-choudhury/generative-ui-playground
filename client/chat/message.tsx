@@ -2,8 +2,7 @@ import { cn } from "@rahul-choudhury/ui"
 import Markdown from "react-markdown"
 import rehypeHighlight from "rehype-highlight"
 import remarkGfm from "remark-gfm"
-import type { Part } from "../../shared/protocol"
-import type { ChatMessage } from "./use-chat"
+import type { ChatMessage, ClientPart } from "./use-chat"
 import { WidgetView } from "./widget-view"
 
 export function Message({ message }: { message: ChatMessage }) {
@@ -51,7 +50,7 @@ const remarkPlugins = [remarkGfm]
 const rehypePlugins = [rehypeHighlight]
 
 /** One branch per part type. */
-function PartView({ part, isStreaming }: { part: Part; isStreaming: boolean }) {
+function PartView({ part, isStreaming }: { part: ClientPart; isStreaming: boolean }) {
   switch (part.type) {
     case "widget":
       return <WidgetView part={part} isStreaming={isStreaming} />

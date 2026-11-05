@@ -11,6 +11,18 @@
 
 @theme {
   --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
+
+  /* Widget rows arriving while arguments stream. Timing comes from the
+     library's motion tokens; use with motion-safe: so reduced-motion users
+     get rows that simply appear. */
+  --animate-row-in: row-in var(--duration-normal) var(--ease-out-quint) both;
+
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
 }
 
 /* Tailwind only scans the Vite root (client/) by default; widget components
