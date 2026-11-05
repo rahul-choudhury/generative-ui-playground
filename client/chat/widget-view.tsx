@@ -81,6 +81,33 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
     return <WidgetFallback kind="invalid" label={definition.label} issues={issues} args={part.args} />
   }
 
+  // Data widgets: the server fetches facts for these arguments next.
+  let data: unknown = undefined
+  if (definition.result) {
+    const fetched = part.result
+    if (fetched === undefined) {
+      // Show what was asked for (e.g. the place) while the fetch runs.
+      if (!isStreaming) return <WidgetInterrupted label={definition.label} partial={false} />
+      return entry.Pending ? (
+        <entry.Pending partial={result.data} />
+      ) : (
+        <div aria-busy="true" aria-label={`Loading ${definition.label}`}>
+          {entry.Skeleton ? <entry.Skeleton /> : <GenericSkeleton />}
+        </div>
+      )
+    }
+    if (fetched.status === "error") {
+      return <WidgetFallback kind="failed" label={definition.label} message={fetched.message} args={part.args} />
+    }
+    // Server-produced, but it travelled through the client: check it too.
+    const parsed = definition.result.schema.safeParse(fetched.data)
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`)
+      return <WidgetFallback kind="invalid" label={definition.label} issues={issues} args={fetched.data} />
+    }
+    data = parsed.data
+  }
+
   return (
     <WidgetErrorBoundary
       fallback={(error) => (
@@ -89,6 +116,7 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
     >
       <entry.Component
         args={result.data}
+        result={data}
         // Interactive widgets start from a state derived from their arguments
         // until the user changes it.
         state={part.state ?? definition.state?.initial(result.data)}

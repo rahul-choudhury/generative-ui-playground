@@ -5,20 +5,23 @@ import type { ChatMessage } from "./use-chat"
  * is stored separately; it's recomputed from the messages.
  */
 export function summarizeUsage(messages: ChatMessage[]) {
-  const withUsage = messages.filter((m) => m.usage)
-  const latest = withUsage.at(-1)?.usage
+  // Every model request, in order. A data-widget turn makes two.
+  const all = messages.flatMap((m) => m.usage ?? [])
+  const latest = all.at(-1)
 
-  // Each request re-sends the whole history, so the LATEST response's input
+  // Each request re-sends the whole history, so the LATEST request's input
   // already is the full conversation. Its reply joins the history next turn.
-  // Reasoning tokens aren't sent back, so they don't occupy context.
+  // Reasoning tokens aren't sent back, so they don't occupy context. (A
+  // second pass also carries the first pass's encrypted reasoning, which
+  // later turns drop, so this can slightly overstate context after one.)
   const contextTokens = latest
     ? latest.inputTokens + latest.outputTokens - latest.reasoningTokens
     : 0
 
+  // Cost is every request: both passes of a data-widget turn are billed.
   const totals = { input: 0, cached: 0, cacheWrites: 0, output: 0, reasoning: 0, costUsd: 0 }
   let unpricedCount = 0
-  for (const { usage } of withUsage) {
-    if (!usage) continue
+  for (const usage of all) {
     totals.input += usage.inputTokens
     totals.cached += usage.cachedInputTokens
     totals.cacheWrites += usage.cacheWriteTokens
@@ -29,7 +32,7 @@ export function summarizeUsage(messages: ChatMessage[]) {
   }
 
   return {
-    hasUsage: withUsage.length > 0,
+    hasUsage: all.length > 0,
     contextTokens,
     maxInputTokens: latest?.maxInputTokens ?? null,
     longContextThreshold: latest?.longContextThreshold ?? null,

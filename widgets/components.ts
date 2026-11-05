@@ -6,24 +6,22 @@
  * arguments its schema produces and the state its state schema describes.
  */
 import type { ComponentType } from "react"
-import type { z } from "zod"
 import { Checklist, ChecklistPending } from "./checklist/component"
 import { ChecklistSkeleton } from "./checklist/skeleton"
 import { Choices, ChoicesPending } from "./choices/component"
 import { ChoicesSkeleton } from "./choices/skeleton"
-import type { WidgetDefinition, WidgetProps } from "./define"
-import type { definitions, WidgetName } from "./definitions"
+import type { WidgetProps } from "./define"
+import type { ArgsOf, ResultOf, StateOf, WidgetName } from "./definitions"
 import { FactCard, FactCardPending } from "./fact-card/component"
 import { FactCardSkeleton } from "./fact-card/skeleton"
+import { Weather, WeatherPending, WeatherSkeleton } from "./weather/component"
 
-type DefinitionOf<N extends WidgetName> = Extract<(typeof definitions)[number], { name: N }>
-type ArgsOf<N extends WidgetName> = z.infer<DefinitionOf<N>["schema"]>
-type StateOf<N extends WidgetName> =
-  DefinitionOf<N> extends WidgetDefinition<string, z.ZodObject, infer S> ? z.infer<S> : never
-
-export type WidgetEntry<Args, State> = {
-  /** The finished widget, given validated arguments and its current state. */
-  Component: ComponentType<WidgetProps<Args, State>>
+export type WidgetEntry<Args, State, Result> = {
+  /**
+   * The finished widget, given validated arguments, its current state, and
+   * (data widgets) the validated data the server fetched.
+   */
+  Component: ComponentType<WidgetProps<Args, State, Result>>
   /**
    * The widget while its arguments stream, given whatever has been parsed so
    * far. `partial` is unvalidated, so it's typed unknown: read it
@@ -36,10 +34,11 @@ export type WidgetEntry<Args, State> = {
   Skeleton?: ComponentType
 }
 
-export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>, StateOf<N>> } = {
+export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>, StateOf<N>, ResultOf<N>> } = {
   show_checklist: { Component: Checklist, Pending: ChecklistPending, Skeleton: ChecklistSkeleton },
   show_fact_card: { Component: FactCard, Pending: FactCardPending, Skeleton: FactCardSkeleton },
   show_choices: { Component: Choices, Pending: ChoicesPending, Skeleton: ChoicesSkeleton },
+  show_weather: { Component: Weather, Pending: WeatherPending, Skeleton: WeatherSkeleton },
 }
 
 /**
@@ -47,8 +46,8 @@ export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>, StateOf<N>>
  * type above ties each component to its schema, and the caller validates args
  * with that same schema before rendering.
  */
-export function getComponents(name: string): WidgetEntry<Record<string, unknown>, unknown> | undefined {
+export function getComponents(name: string): WidgetEntry<Record<string, unknown>, unknown, unknown> | undefined {
   return Object.hasOwn(components, name)
-    ? (components[name as WidgetName] as unknown as WidgetEntry<Record<string, unknown>, unknown>)
+    ? (components[name as WidgetName] as unknown as WidgetEntry<Record<string, unknown>, unknown, unknown>)
     : undefined
 }

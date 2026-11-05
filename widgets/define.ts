@@ -28,10 +28,28 @@ export type WidgetStateConfig<Args, StateSchema extends z.ZodType> = {
   describeChange: (args: Args, before: z.infer<StateSchema>, after: z.infer<StateSchema>) => string | null
 }
 
+/**
+ * Data the server fetches for a widget after the model calls it (e.g. a
+ * forecast for the place it named): the model supplies intent, the backend
+ * supplies facts. Only the shape and the model-facing summary live here; the
+ * fetching itself is server-only (server/widgets/resolvers.ts).
+ */
+export type WidgetResultConfig<Args, ResultSchema extends z.ZodType> = {
+  /** Validates fetched data wherever it's used (client render, history). */
+  schema: ResultSchema
+  /**
+   * What the model is told was shown: the facts it needs to talk about it,
+   * in compact text. Used both in the same turn (the second pass) and in
+   * later turns' history, so it's identical in both.
+   */
+  summarize: (args: Args, data: z.infer<ResultSchema>) => string
+}
+
 export type WidgetDefinition<
   Name extends string = string,
   Schema extends z.ZodObject = z.ZodObject,
   StateSchema extends z.ZodType = z.ZodType,
+  ResultSchema extends z.ZodType = z.ZodType,
 > = {
   /** Tool name the model calls, e.g. "show_checklist". Must be unique. */
   name: Name
@@ -43,25 +61,32 @@ export type WidgetDefinition<
   schema: Schema
   /** Only for interactive widgets. */
   state?: WidgetStateConfig<z.infer<Schema>, StateSchema>
+  /** Only for data widgets: the server fetches this after the call. */
+  result?: WidgetResultConfig<z.infer<Schema>, ResultSchema>
 }
 
 /**
- * Identity function whose only job is inference: it keeps the literal name,
- * the exact argument schema and the state schema, so the component registry
- * can be type-checked against each widget's own arguments and state. A widget
- * without `state` gets state type `undefined`.
+ * Identity function whose only job is inference: it keeps the literal name
+ * and the exact argument, state and result schemas, so the component and
+ * resolver registries can be type-checked against each widget. A widget
+ * without `state` or `result` gets type `undefined` for it.
  */
 export function defineWidget<
   const Name extends string,
   Schema extends z.ZodObject,
   StateSchema extends z.ZodType = z.ZodUndefined,
->(definition: WidgetDefinition<Name, Schema, StateSchema>): WidgetDefinition<Name, Schema, StateSchema> {
+  ResultSchema extends z.ZodType = z.ZodUndefined,
+>(
+  definition: WidgetDefinition<Name, Schema, StateSchema, ResultSchema>
+): WidgetDefinition<Name, Schema, StateSchema, ResultSchema> {
   return definition
 }
 
 /** Props every finished widget component receives. */
-export type WidgetProps<Args, State> = {
+export type WidgetProps<Args, State, Result = undefined> = {
   args: Args
+  /** Data widgets: what the server fetched (undefined for other widgets). */
+  result: Result
   /** Current interactive state (undefined for widgets without state). */
   state: State
   /**

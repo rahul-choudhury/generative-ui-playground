@@ -57,10 +57,10 @@ describe("toOpenAIInput", () => {
 
   test("an unknown widget tells the model it doesn't exist", () => {
     const [, output] = toOpenAIInput([
-      assistant({ type: "widget", id: "call_3", name: "show_weather", args: { city: "Oslo" } }),
+      assistant({ type: "widget", id: "call_3", name: "show_horoscope", args: { city: "Oslo" } }),
     ])
     expect((output as { output: string }).output).toBe(
-      'Not shown: there is no widget named "show_weather". The user saw an error message instead.'
+      'Not shown: there is no widget named "show_horoscope". The user saw an error message instead.'
     )
   })
 
@@ -80,7 +80,7 @@ describe("toOpenAIInput", () => {
       user("lists please"),
       assistant(
         { type: "widget", id: "a", name: "show_checklist", args: checklistArgs },
-        { type: "widget", id: "b", name: "show_weather", args: {} },
+        { type: "widget", id: "b", name: "show_horoscope", args: {} },
         { type: "widget", id: "c", name: "show_checklist" }
       ),
     ])
@@ -160,5 +160,47 @@ describe("toOpenAIInput: widget state events", () => {
       const items = toOpenAIInput([listWidget, message])
       expect(contents(items).some((c) => c.startsWith("<widget_events>"))).toBe(false)
     }
+  })
+})
+
+describe("toOpenAIInput: data widgets", () => {
+  const weatherArgs = { location: "Oslo", country: null, days: 1, units: "celsius" }
+  const weatherData = {
+    place: { name: "Oslo", region: "Oslo", country: "Norway", timezone: "Europe/Oslo" },
+    units: "celsius",
+    current: { time: "2026-11-05T21:45", temperature: 3.1, feelsLike: 0.2, code: 0, isDay: false, windSpeed: 6.1 },
+    daily: [{ date: "2026-11-06", code: 61, max: 5, min: 0.7, precipitationChance: 80 }],
+  }
+  const outputFor = (result?: unknown) => {
+    const [, output] = toOpenAIInput([
+      assistant({ type: "widget", id: "w", name: "show_weather", args: weatherArgs, result: result as never }),
+    ])
+    return (output as { output: string }).output
+  }
+
+  test("the model is told the fetched figures, with the place's local date", () => {
+    // Now is Thu 5 Nov there, so the 6th is labelled "tomorrow": without the
+    // date, the model was observed treating the first day as tomorrow.
+    expect(outputFor({ status: "ok", data: weatherData })).toBe(
+      [
+        "Shown to the user: live weather for Oslo, Norway.",
+        "Local date and time there: Thu 5 Nov, 21:45 (Europe/Oslo).",
+        "Now: 3°C, feels like 0°C, clear, wind 6 km/h.",
+        "Fri 6 Nov (tomorrow): light rain, 1 to 5°C, 80% chance of precipitation.",
+        "Only these 1 day(s) were fetched. For other days, show the weather again with more days.",
+        "Source: Open-Meteo. Use only these figures; don't invent others.",
+      ].join("\n")
+    )
+  })
+
+  test("a failed fetch passes its reason on", () => {
+    expect(outputFor({ status: "error", message: "Couldn't find a place called “Oslo”." })).toBe(
+      "Not shown: Couldn't find a place called “Oslo”. The user saw this error instead."
+    )
+  })
+
+  test("no result (stopped mid-fetch) or bad data is never reported as shown", () => {
+    expect(outputFor(undefined)).toStartWith("Not shown: the reply was interrupted")
+    expect(outputFor({ status: "ok", data: { place: "nope" } })).toStartWith("Not shown: the fetched data was invalid")
   })
 })

@@ -17,11 +17,27 @@ export const TextPartSchema = z.object({
  * `args` is undefined while the arguments are still streaming, and is NOT
  * validated here: the client checks it against the widget's own schema.
  */
+/**
+ * What the server fetched for a data widget (e.g. a forecast for the place
+ * the model named). `data` is validated against the widget's result schema
+ * by whoever uses it; `message` is a user-facing reason for failure.
+ */
+export const ToolResultSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("ok"), data: z.unknown() }),
+  z.object({ status: z.literal("error"), message: z.string() }),
+])
+
 export const WidgetPartSchema = z.object({
   type: z.literal("widget"),
   id: z.string(),
   name: z.string(),
   args: z.unknown().optional(),
+  /**
+   * Data widgets only: what the server fetched for these args. Kept on the
+   * part and sent back with history, so later turns tell the model exactly
+   * what was shown without fetching again.
+   */
+  result: ToolResultSchema.optional(),
 })
 
 /**
@@ -54,6 +70,7 @@ export const ChatRequestSchema = z.object({
 })
 
 export type TextPart = z.infer<typeof TextPartSchema>
+export type ToolResult = z.infer<typeof ToolResultSchema>
 export type WidgetPart = z.infer<typeof WidgetPartSchema>
 export type WidgetStatePart = z.infer<typeof WidgetStatePartSchema>
 export type Part = z.infer<typeof PartSchema>
@@ -92,6 +109,8 @@ export type StreamEvent =
   | { type: "tool-call-start"; id: string; name: string }
   | { type: "tool-call-delta"; id: string; delta: string }
   | { type: "tool-call-end"; id: string; args: unknown }
+  // Data widgets: what the server fetched, after tool-call-end.
+  | { type: "tool-result"; id: string; result: ToolResult }
   | { type: "usage"; usage: Usage }
   | { type: "done" }
   | { type: "error"; message: string }

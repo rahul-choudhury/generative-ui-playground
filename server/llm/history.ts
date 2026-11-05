@@ -88,12 +88,32 @@ export function widgetOutput(part: WidgetPart): string {
   const result = validateWidget(part.name, part.args)
   switch (result.status) {
     case "ok":
-      return "Shown to the user."
+      return dataWidgetOutput(part, result.data) ?? "Shown to the user."
     case "unknown":
       return `Not shown: there is no widget named "${part.name}". The user saw an error message instead.`
     case "invalid":
       return `Not shown: invalid arguments (${result.issues.join("; ")}). The user saw an error message instead.`
   }
+}
+
+/**
+ * Data widgets: the fetched facts the model needs to talk about them (the
+ * same text it got in the same turn's second pass), or why there were none.
+ * Null for widgets without a result.
+ */
+function dataWidgetOutput(part: WidgetPart, args: Record<string, unknown>): string | null {
+  const config = getDefinition(part.name)?.result
+  if (!config) return null
+
+  if (part.result === undefined) {
+    return "Not shown: the reply was interrupted before the data was fetched."
+  }
+  if (part.result.status === "error") {
+    return `Not shown: ${part.result.message} The user saw this error instead.`
+  }
+  const data = config.schema.safeParse(part.result.data)
+  if (!data.success) return "Not shown: the fetched data was invalid. The user saw an error message instead."
+  return config.summarize(args, data.data)
 }
 
 /** Remember a rendered, interactive widget and the state it starts in. */

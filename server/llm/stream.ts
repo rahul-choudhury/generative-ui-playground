@@ -1,7 +1,12 @@
-import type { ResponseStreamEvent } from "openai/resources/responses/responses"
-import type { Message, StreamEvent } from "../../shared/protocol"
+import type {
+  ResponseInputItem,
+  ResponseOutputItem,
+  ResponseStreamEvent,
+} from "openai/resources/responses/responses"
+import type { Message, StreamEvent, ToolResult } from "../../shared/protocol"
 import { validateWidget } from "../../widgets/validate"
-import { toOpenAIInput } from "./history"
+import { hasResolver, resolveWidget } from "../widgets/resolvers"
+import { toOpenAIInput, widgetOutput } from "./history"
 import { toUsage } from "./models"
 import { model, openai } from "./openai"
 import { tools } from "./tools"
@@ -10,95 +15,45 @@ import { systemPrompt } from "./system-prompt"
 /**
  * Calls OpenAI and yields our own StreamEvents. This is the only place that
  * knows OpenAI's event names; swapping providers means rewriting this file.
+ *
+ * Usually one model request per turn: a widget call ends the reply. Data
+ * widgets (those with a server resolver, e.g. weather) get a second pass:
+ * the model only named a place, so once the server has fetched the facts
+ * they're sent back to it and it continues, answering from real data.
  */
 export async function* streamChat(
   messages: Message[],
   signal: AbortSignal
 ): AsyncGenerator<StreamEvent> {
   try {
-    const stream = await openai.responses.create(
-      {
-        model,
-        instructions: systemPrompt,
-        input: toOpenAIInput(messages),
-        tools,
-        stream: true,
-        store: false, // stateless: the client sends the full history each time
-      },
-      { signal }
-    )
+    let input = toOpenAIInput(messages)
 
-    // Argument deltas carry OpenAI's item_id, not the call_id we use as the
-    // widget id, so remember the mapping from output_item.added.
-    const callIdByItemId = new Map<string, string>()
+    for (let pass = 1; pass <= 2; pass++) {
+      const outcome = yield* streamPass(input, { signal, final: pass === 2 })
+      if (outcome.kind === "stopped") return // error already reported
 
-    for await (const event of stream) {
-      if (LOG_EVENTS) logEvent(event)
-
-      switch (event.type) {
-        case "response.output_text.delta":
-        case "response.refusal.delta":
-          yield { type: "text-delta", delta: event.delta }
-          break
-
-        // Function calls. A reasoning item may come first, so these are
-        // tracked by id, never by output_index.
-        case "response.output_item.added":
-          if (event.item.type === "function_call") {
-            if (event.item.id) callIdByItemId.set(event.item.id, event.item.call_id)
-            yield { type: "tool-call-start", id: event.item.call_id, name: event.item.name }
-          }
-          break
-
-        case "response.function_call_arguments.delta": {
-          const id = callIdByItemId.get(event.item_id)
-          if (id) yield { type: "tool-call-delta", id, delta: event.delta }
-          break
-        }
-
-        case "response.output_item.done":
-          if (event.item.type === "function_call") {
-            const args = parseArgs(event.item.arguments)
-            logIfUnrenderable(event.item.name, args)
-            yield { type: "tool-call-end", id: event.item.call_id, args }
-          }
-          break
-
-        // Usage only arrives in these final events. A reply cut off by Stop
-        // never gets one, so its cost stays unknown.
-        case "response.completed": {
-          const usage = toUsage(event.response)
-          if (usage) yield { type: "usage", usage }
-          break
-        }
-
-        case "response.failed": {
-          const usage = toUsage(event.response)
-          if (usage) yield { type: "usage", usage } // partial work is still billed
-          yield {
-            type: "error",
-            message: event.response.error?.message ?? "The model failed to respond.",
-          }
-          return
-        }
-
-        case "response.incomplete": {
-          const usage = toUsage(event.response)
-          if (usage) yield { type: "usage", usage }
-          yield {
-            type: "error",
-            message: `Response cut off (${event.response.incomplete_details?.reason ?? "unknown reason"}).`,
-          }
-          return
-        }
-
-        case "error":
-          yield { type: "error", message: event.message }
-          return
-
-        // Everything else (created, in_progress, reasoning, item added/done…)
-        // isn't needed yet. Step 2 starts listening for function calls here.
+      // Wait for any data still being fetched, and send it to the client.
+      const results = new Map<string, ToolResult>()
+      for (const [id, pending] of outcome.fetches) {
+        const result = await pending
+        results.set(id, result)
+        yield { type: "tool-result", id, result }
       }
+      if (outcome.fetches.size === 0 || pass === 2) break
+
+      // Second pass: this response's output (including encrypted reasoning,
+      // which OpenAI recommends passing back between tool turns), then an
+      // output for every call. Data widgets get their facts; others the same
+      // text history would give them, so later turns read identically.
+      input = [
+        ...input,
+        ...outcome.output.flatMap(toInputItem),
+        ...outcome.calls.map((call): ResponseInputItem => ({
+          type: "function_call_output",
+          call_id: call.id,
+          output: widgetOutput({ type: "widget", ...call, result: results.get(call.id) }),
+        })),
+      ]
     }
 
     yield { type: "done" }
@@ -106,6 +61,142 @@ export async function* streamChat(
     if (signal.aborted) return // the client hit Stop; nobody is listening
     console.error(err)
     yield { type: "error", message: err instanceof Error ? err.message : "Unknown error" }
+  }
+}
+
+type PassOutcome =
+  | { kind: "stopped" }
+  | {
+      kind: "completed"
+      output: ResponseOutputItem[]
+      calls: { id: string; name: string; args: unknown }[]
+      /** Data being fetched, keyed by call id. Started as soon as args end. */
+      fetches: Map<string, Promise<ToolResult>>
+    }
+
+/** One model request, streamed as our events. */
+async function* streamPass(
+  input: ResponseInputItem[],
+  { signal, final }: { signal: AbortSignal; final: boolean }
+): AsyncGenerator<StreamEvent, PassOutcome> {
+  const stream = await openai.responses.create(
+    {
+      model,
+      instructions: systemPrompt,
+      input,
+      tools,
+      // The second pass answers from the data; it can't start another fetch.
+      tool_choice: final ? "none" : "auto",
+      include: ["reasoning.encrypted_content"],
+      stream: true,
+      store: false, // stateless: the client sends the full history each time
+    },
+    { signal }
+  )
+
+  // Argument deltas carry OpenAI's item_id, not the call_id we use as the
+  // widget id, so remember the mapping from output_item.added.
+  const callIdByItemId = new Map<string, string>()
+  const calls: { id: string; name: string; args: unknown }[] = []
+  const fetches = new Map<string, Promise<ToolResult>>()
+  let output: ResponseOutputItem[] = []
+
+  for await (const event of stream) {
+    if (LOG_EVENTS) logEvent(event)
+
+    switch (event.type) {
+      case "response.output_text.delta":
+      case "response.refusal.delta":
+        yield { type: "text-delta", delta: event.delta }
+        break
+
+      // Function calls. A reasoning item may come first, so these are
+      // tracked by id, never by output_index.
+      case "response.output_item.added":
+        if (event.item.type === "function_call") {
+          if (event.item.id) callIdByItemId.set(event.item.id, event.item.call_id)
+          yield { type: "tool-call-start", id: event.item.call_id, name: event.item.name }
+        }
+        break
+
+      case "response.function_call_arguments.delta": {
+        const id = callIdByItemId.get(event.item_id)
+        if (id) yield { type: "tool-call-delta", id, delta: event.delta }
+        break
+      }
+
+      case "response.output_item.done":
+        if (event.item.type === "function_call") {
+          const { call_id: id, name } = event.item
+          const args = parseArgs(event.item.arguments)
+          logIfUnrenderable(name, args)
+          yield { type: "tool-call-end", id, args }
+          calls.push({ id, name, args })
+          // Start fetching now, overlapping with the rest of the stream.
+          if (hasResolver(name)) fetches.set(id, resolveWidget(name, args, signal))
+        }
+        break
+
+      // Usage only arrives in these final events. A reply cut off by Stop
+      // never gets one, so its cost stays unknown. Each pass reports its
+      // own usage; the client adds them up.
+      case "response.completed": {
+        const usage = toUsage(event.response)
+        if (usage) yield { type: "usage", usage }
+        output = event.response.output
+        break
+      }
+
+      case "response.failed": {
+        const usage = toUsage(event.response)
+        if (usage) yield { type: "usage", usage } // partial work is still billed
+        yield {
+          type: "error",
+          message: event.response.error?.message ?? "The model failed to respond.",
+        }
+        return { kind: "stopped" }
+      }
+
+      case "response.incomplete": {
+        const usage = toUsage(event.response)
+        if (usage) yield { type: "usage", usage }
+        yield {
+          type: "error",
+          message: `Response cut off (${event.response.incomplete_details?.reason ?? "unknown reason"}).`,
+        }
+        return { kind: "stopped" }
+      }
+
+      case "error":
+        yield { type: "error", message: event.message }
+        return { kind: "stopped" }
+
+      // Everything else (created, in_progress, reasoning, item added/done…)
+      // isn't needed.
+    }
+  }
+
+  return { kind: "completed", output, calls, fetches }
+}
+
+/**
+ * A response output item as next-pass input. Function calls go back without
+ * OpenAI's item ids (with store: false those items don't exist server-side),
+ * the same shape history uses. Reasoning goes back whole, encrypted content
+ * included. Messages become plain assistant text.
+ */
+function toInputItem(item: ResponseOutputItem): ResponseInputItem[] {
+  switch (item.type) {
+    case "reasoning":
+      return [item]
+    case "function_call":
+      return [{ type: "function_call", call_id: item.call_id, name: item.name, arguments: item.arguments }]
+    case "message": {
+      const text = item.content.map((part) => (part.type === "output_text" ? part.text : "")).join("")
+      return text ? [{ role: "assistant", content: text }] : []
+    }
+    default:
+      return []
   }
 }
 

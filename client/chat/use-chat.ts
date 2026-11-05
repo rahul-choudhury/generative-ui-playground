@@ -30,8 +30,11 @@ export type ChatMessage = Omit<Message, "parts"> & {
   parts: ClientPart[]
   status: "streaming" | "done" | "stopped" | "error"
   error?: string
-  /** Assistant messages only; missing when the reply was stopped. */
-  usage?: Usage
+  /**
+   * Assistant messages only: one entry per model request (data widgets make
+   * two). Empty when the reply was stopped before any usage arrived.
+   */
+  usage?: Usage[]
 }
 
 export function useChat() {
@@ -129,6 +132,14 @@ export function useChat() {
                 ),
               }))
               break
+            case "tool-result":
+              updateLast((m) => ({
+                ...m,
+                parts: m.parts.map((p) =>
+                  p.type === "widget" && p.id === event.id ? { ...p, result: event.result } : p
+                ),
+              }))
+              break
             case "tool-call-end":
               updateLast((m) => ({
                 ...m,
@@ -138,7 +149,7 @@ export function useChat() {
               }))
               break
             case "usage":
-              updateLast((m) => ({ ...m, usage: event.usage }))
+              updateLast((m) => ({ ...m, usage: [...(m.usage ?? []), event.usage] }))
               break
             case "done":
               updateLast((m) => ({ ...m, status: "done" }))

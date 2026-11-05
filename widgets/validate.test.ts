@@ -32,7 +32,7 @@ describe("validateWidget", () => {
   })
 
   test("reports unknown widget names", () => {
-    expect(validateWidget("show_weather", { city: "Oslo" })).toEqual({ status: "unknown" })
+    expect(validateWidget("show_horoscope", { city: "Oslo" })).toEqual({ status: "unknown" })
   })
 
   test("reports each problem with its path", () => {

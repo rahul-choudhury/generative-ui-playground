@@ -4,6 +4,8 @@ type FallbackProps =
   | { kind: "unknown"; name: string; args: unknown }
   | { kind: "invalid"; label: string; issues: string[]; args: unknown }
   | { kind: "crashed"; label: string; error: Error; args: unknown }
+  /** A data widget whose fetch failed; `message` is already user-facing. */
+  | { kind: "failed"; label: string; message: string; args: unknown }
 
 /**
  * Shown in place of a widget that can't be displayed. Quiet by design: a
@@ -66,6 +68,8 @@ function copy(props: FallbackProps) {
         title: `The ${props.label} ran into an error`,
         description: "Something went wrong while displaying it.",
       }
+    case "failed":
+      return { title: `Couldn't load the ${props.label}`, description: props.message }
   }
 }
 
