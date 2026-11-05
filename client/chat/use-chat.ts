@@ -23,9 +23,7 @@ export type ClientWidgetPart = WidgetPart & {
   state?: unknown
   reportedState?: unknown
 }
-/** A state snapshot plus how the change read, shown under the user's message. */
-export type ClientWidgetStatePart = WidgetStatePart & { summary?: string }
-export type ClientPart = TextPart | ClientWidgetPart | ClientWidgetStatePart
+export type ClientPart = TextPart | ClientWidgetPart | WidgetStatePart
 
 /** Client-only fields on top of the wire Message. Never sent to the server. */
 export type ChatMessage = Omit<Message, "parts"> & {
@@ -57,7 +55,7 @@ export function useChat() {
       const user: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
-        parts: [...snapshots.map((s) => s.part), { type: "text", text: content }],
+        parts: [...snapshots, { type: "text", text: content }],
         status: "done",
       }
       const assistant: ChatMessage = {
@@ -75,7 +73,7 @@ export function useChat() {
 
       // Mark what was just reported, so the next message only sends changes
       // made after this one.
-      const reported = new Map(snapshots.map((s) => [s.part.widgetId, s.part.state]))
+      const reported = new Map(snapshots.map((s) => [s.widgetId, s.state]))
       setMessages((prev) => [
         ...prev.map((m) => ({
           ...m,
@@ -187,7 +185,7 @@ export function useChat() {
  * unticking the same item cancels out, so no snapshot is sent.
  */
 function collectSnapshots(messages: ChatMessage[]) {
-  const snapshots: { part: ClientWidgetStatePart }[] = []
+  const snapshots: WidgetStatePart[] = []
 
   for (const message of messages) {
     for (const part of message.parts) {
@@ -199,15 +197,7 @@ function collectSnapshots(messages: ChatMessage[]) {
       const before = part.reportedState ?? config.initial(result.data)
       if (JSON.stringify(before) === JSON.stringify(part.state)) continue
 
-      snapshots.push({
-        part: {
-          type: "widget-state",
-          widgetId: part.id,
-          state: part.state,
-          // Same wording the server will give the model, shown to the user.
-          summary: config.describeChange(result.data, before, part.state) ?? undefined,
-        },
-      })
+      snapshots.push({ type: "widget-state", widgetId: part.id, state: part.state })
     }
   }
   return snapshots
@@ -218,10 +208,6 @@ function toWirePart(part: ClientPart): Part {
   switch (part.type) {
     case "widget": {
       const { argsText: _a, state: _s, reportedState: _r, ...wire } = part
-      return wire
-    }
-    case "widget-state": {
-      const { summary: _, ...wire } = part
       return wire
     }
     default:
