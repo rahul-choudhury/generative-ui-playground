@@ -1,6 +1,6 @@
 import { ArrowUpIcon, StopIcon } from "@phosphor-icons/react"
 import { Button, Textarea } from "@rahul-choudhury/ui/components"
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react"
+import { useEffect, useRef, useState, type KeyboardEvent, type SyntheticEvent } from "react"
 
 type ComposerProps = {
   isStreaming: boolean
@@ -20,7 +20,9 @@ export function Composer({ isStreaming, onSend, onStop }: ComposerProps) {
     if (!isStreaming) textareaRef.current?.focus()
   }, [isStreaming])
 
-  const submit = (e?: FormEvent) => {
+  // Called from the form's onSubmit and from Enter in onKeyDown, so it takes
+  // the shared base type. preventDefault stops the page reload / the newline.
+  const submit = (e?: SyntheticEvent) => {
     e?.preventDefault()
     if (!canSend) return
     onSend(text)
