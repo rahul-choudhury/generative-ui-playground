@@ -136,7 +136,7 @@ export function createRecipeResolver({
 
   /** Author and licence of the file behind an image URL, from Commons. */
   async function creditFor(imageUrl: string, signal: AbortSignal) {
-    const fileName = decodeURIComponent(new URL(imageUrl).pathname.split("/").pop() ?? "")
+    const fileName = commonsFileName(imageUrl)
     const filePage = `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fileName)}`
     const url = new URL(COMMONS_URL)
     url.search = new URLSearchParams({
@@ -175,6 +175,18 @@ export function createRecipeResolver({
     value.catch(() => cache.delete(key)) // never cache a failure
     return value
   }
+}
+
+/**
+ * The Commons file behind an image URL. Usually the last path segment, but
+ * for very large images Wikipedia's "original" is itself a thumbnail
+ * (…/thumb/3/3a/Okonomiyaki_001.jpg/3840px-Okonomiyaki_001.jpg), where the
+ * file is the segment before.
+ */
+export function commonsFileName(imageUrl: string): string {
+  const segments = new URL(imageUrl).pathname.split("/")
+  const name = segments.includes("thumb") ? segments.at(-2) : segments.at(-1)
+  return decodeURIComponent(name ?? "")
 }
 
 function absoluteUrl(url: string): string | null {

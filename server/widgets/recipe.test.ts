@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import type { RecipeArgs } from "../../widgets/recipe/definition"
 import { ResolveError } from "./resolve-error"
-import { createRecipeResolver } from "./recipe"
+import { commonsFileName, createRecipeResolver } from "./recipe"
 
 // A real Commons imageinfo response (Shakshuka photo), saved so these tests
 // never hit Wikimedia's rate limit.
@@ -146,5 +146,26 @@ describe("recipe photo resolver", () => {
     await resolve(args("Shakshouka"), signal())
     await resolve(args("shakshouka"), signal())
     expect(requests).toHaveLength(2)
+  })
+})
+
+describe("commonsFileName", () => {
+  test("a plain original: the last segment", () => {
+    expect(commonsFileName("https://upload.wikimedia.org/wikipedia/commons/1/18/Shakshuka_by_Calliopejen1.jpg")).toBe(
+      "Shakshuka_by_Calliopejen1.jpg"
+    )
+  })
+
+  test("a very large 'original' is a thumbnail: the segment before the size", () => {
+    // Real case: the Okonomiyaki article's originalimage.
+    expect(
+      commonsFileName(
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Okonomiyaki_001.jpg/3840px-Okonomiyaki_001.jpg"
+      )
+    ).toBe("Okonomiyaki_001.jpg")
+  })
+
+  test("encoded names are decoded", () => {
+    expect(commonsFileName("https://upload.wikimedia.org/wikipedia/commons/a/ab/Cr%C3%AApe.jpg")).toBe("Crêpe.jpg")
   })
 })
