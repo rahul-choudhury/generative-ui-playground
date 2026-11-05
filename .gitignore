@@ -3,3 +3,6 @@ dist
 .env
 .DS_Store
 evals/results
+
+# Markdown is ignored by default; include one deliberately with: git add -f <file>.md
+*.md
