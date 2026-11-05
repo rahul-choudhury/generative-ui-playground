@@ -5,6 +5,18 @@ import { isSelectableModel, listModels } from "./llm/models"
 import { model as defaultModel } from "./llm/openai"
 import { streamChat } from "./llm/stream"
 
+// The default must be selectable: the browser falls back to it and sends it
+// with every message, and /api/chat only accepts models from the price
+// table. An unpriced default would make every message fail with a 400, so
+// fail here at startup instead, with the fix in the message.
+if (!isSelectableModel(defaultModel)) {
+  const known = listModels().map((m) => m.id).join(", ")
+  throw new Error(
+    `OPENAI_MODEL is "${defaultModel}", which has no prices in server/llm/models.ts. ` +
+      `Add its prices there, or set OPENAI_MODEL to one of: ${known}.`
+  )
+}
+
 const app = new Hono()
 
 /** What the model selector offers: priced models, and the server default. */
