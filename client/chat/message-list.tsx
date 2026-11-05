@@ -22,7 +22,11 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
   }, [messages])
 
   return (
-    <div ref={scrollRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto">
+    // `relative` makes this scroller the containing block for absolutely
+    // positioned descendants (e.g. Tailwind's sr-only). Without it they're
+    // positioned against <body> at their unscrolled offset, which pushed the
+    // page taller than the window and gave it a second scrollbar.
+    <div ref={scrollRef} onScroll={onScroll} className="relative min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto flex max-w-(--layout-container) flex-col gap-6 px-4 py-8">
         {messages.map((message) => (
           <Message key={message.id} message={message} />
