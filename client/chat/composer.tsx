@@ -1,6 +1,6 @@
 import { ArrowUpIcon, StopIcon } from "@phosphor-icons/react"
 import { Button, Textarea } from "@rahul-choudhury/ui/components"
-import { useState, type FormEvent, type KeyboardEvent } from "react"
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react"
 
 type ComposerProps = {
   isStreaming: boolean
@@ -11,6 +11,14 @@ type ComposerProps = {
 export function Composer({ isStreaming, onSend, onStop }: ComposerProps) {
   const [text, setText] = useState("")
   const canSend = text.trim().length > 0 && !isStreaming
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // When a response ends (finished or stopped), put the cursor back in the
+  // textarea. Otherwise clicking Stop leaves focus on a button that then
+  // swaps to Send, and typing goes nowhere.
+  useEffect(() => {
+    if (!isStreaming) textareaRef.current?.focus()
+  }, [isStreaming])
 
   const submit = (e?: FormEvent) => {
     e?.preventDefault()
@@ -29,6 +37,7 @@ export function Composer({ isStreaming, onSend, onStop }: ComposerProps) {
     <form onSubmit={submit} className="mx-auto w-full max-w-(--layout-container) px-4 pb-4">
       <div className="flex items-end gap-2 rounded-lg border border-border bg-surface p-2 shadow-sm focus-within:border-border-strong">
         <Textarea
+          ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
