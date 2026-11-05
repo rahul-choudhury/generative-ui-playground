@@ -7,7 +7,12 @@ type Props = {
   onSelect: (id: string) => void
 }
 
-const price = (usd: number | null) => (usd === null ? "?" : `$${usd < 1 ? usd.toFixed(2) : usd}`)
+// Always two decimals, so "$1.00" and "$0.10" are the same width.
+const price = (usd: number | null) => (usd === null ? "?" : `$${usd.toFixed(2)}`)
+
+// One set of fixed column widths for the header and every row, so the
+// prices line up as columns instead of following each label's length.
+const COLUMNS = "grid grid-cols-[7rem_3.25rem_3.25rem] items-baseline gap-x-3"
 
 /**
  * Which model answers the next message. Quiet like the usage indicator it
@@ -34,18 +39,31 @@ export function ModelSelect({ models, selected, onSelect }: Props) {
         alignItemWithTrigger={false}
         className="min-w-64 translate-x-[calc((100%-var(--anchor-width))/2)]"
       >
+        {/* Column headings for sighted users; each row spells them out for
+            screen readers instead. */}
+        <div aria-hidden className={`${COLUMNS} px-2.5 pt-2 pb-1 text-[11px] text-text-muted`}>
+          <span>Model</span>
+          <span className="text-right">In</span>
+          <span className="text-right">Out</span>
+        </div>
         {models.map((model) => (
-          <SelectItem key={model.id} value={model.id} className="h-auto gap-4 py-2">
-            <span className="flex w-full items-baseline justify-between gap-6">
+          <SelectItem key={model.id} value={model.id} className="h-auto gap-3 py-2">
+            <span className={COLUMNS}>
               <span>{model.label}</span>
-              <span className="text-xs text-text-muted tabular-nums">
-                {price(model.inputPerMillion)} in · {price(model.outputPerMillion)} out
-                <span className="sr-only"> per million tokens</span>
+              <span className="text-right text-xs text-text-muted tabular-nums">
+                <span className="sr-only">input </span>
+                {price(model.inputPerMillion)}
+              </span>
+              <span className="text-right text-xs text-text-muted tabular-nums">
+                <span className="sr-only">output </span>
+                {price(model.outputPerMillion)}
               </span>
             </span>
           </SelectItem>
         ))}
-        <p className="border-t border-border px-2.5 py-1.5 text-[11px] text-text-muted">Per 1M tokens · applies to your next message</p>
+        <p className="border-t border-border px-2.5 py-1.5 text-[11px] text-text-muted">
+          USD per 1M tokens · applies to your next message
+        </p>
       </SelectContent>
     </Select>
   )
