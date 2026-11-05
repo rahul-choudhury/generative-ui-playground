@@ -116,7 +116,9 @@ function dataWidgetOutput(part: WidgetPart, args: Record<string, unknown>): stri
     return "Not shown: the reply was interrupted before the data was fetched."
   }
   if (part.result.status === "error") {
-    return `Not shown: ${part.result.message} The user saw this error instead.`
+    // The second sentence matters: Terra was seen answering a failed fetch
+    // with no text at all, leaving the user with only the error card.
+    return `Not shown: ${part.result.message} The user saw this error instead. Tell them briefly and suggest what they could do (e.g. check the spelling, add the country).`
   }
   const data = config.schema.safeParse(part.result.data)
   if (!data.success) return "Not shown: the fetched data was invalid. The user saw an error message instead."

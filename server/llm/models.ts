@@ -47,6 +47,26 @@ const MODELS: Record<string, ModelInfo> = {
       },
     },
   },
+  // https://developers.openai.com/api/docs/models/gpt-6.1-terra, checked
+  // 2026-11-06. ~10× Luna; note cached input is 95% off here, not 90%.
+  "gpt-6.1-terra": {
+    maxInputTokens: 922_000, // context window is 1,050,000 incl. 128,000 output
+    longContextThreshold: 272_000,
+    tiers: {
+      standard: {
+        short: { input: 1.0, cachedInput: 0.05, cacheWrite30m: 1.25, cacheWrite12h: 2.5, output: 5.0 },
+        long: { input: 2.0, cachedInput: 0.1, cacheWrite30m: 2.5, cacheWrite12h: 5.0, output: 7.5 },
+      },
+      flex: {
+        short: { input: 0.5, cachedInput: 0.025, cacheWrite30m: 0.625, cacheWrite12h: 1.25, output: 2.5 },
+        long: { input: 1.0, cachedInput: 0.05, cacheWrite30m: 1.25, cacheWrite12h: 2.5, output: 3.75 },
+      },
+      fast: {
+        short: { input: 2.0, cachedInput: 0.1, cacheWrite30m: 2.5, cacheWrite12h: 5.0, output: 10.0 },
+        long: { input: 4.0, cachedInput: 0.2, cacheWrite30m: 5.0, cacheWrite12h: 10.0, output: 15.0 },
+      },
+    },
+  },
 }
 
 /** OpenAI's reported service_tier → our price table's tier. */

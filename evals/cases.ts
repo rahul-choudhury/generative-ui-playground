@@ -228,11 +228,21 @@ export const cases: Case[] = [
             const list = lastWidget(turns, "show_checklist")?.args as ChecklistArgs | undefined
             const reply = turns.at(-1)!.text.toLowerCase()
             if (!list) return false
-            // Match on each label's first significant word, to allow rephrasing.
-            const key = (label: string) => label.toLowerCase().match(/[a-z]{4,}/)?.[0] ?? label.toLowerCase()
+            // An item counts as named if at least half of its distinctive
+            // words appear, which allows rephrasing. Filler is ignored: models
+            // differ ("Pack sunscreen" vs "Sunscreen"), and matching on the
+            // first word wrongly made every "Pack …" item look the same.
+            const FILLER = new Set(["pack", "bring", "your", "with", "some", "extra", "spare", "and", "any", "for", "the"])
+            const words = (label: string) =>
+              (label.toLowerCase().match(/[a-z]{4,}/g) ?? []).filter((w) => !FILLER.has(w))
+            const named = (label: string) => {
+              const distinctive = words(label)
+              const hits = distinctive.filter((w) => reply.includes(w)).length
+              return distinctive.length > 0 && hits * 2 >= distinctive.length
+            }
             return list.items.every((item, i) => {
               const ticked = item.checked || [0, 2].includes(i)
-              return reply.includes(key(item.label)) !== ticked
+              return named(item.label) !== ticked
             })
           }),
         ],

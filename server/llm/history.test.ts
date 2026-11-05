@@ -197,7 +197,7 @@ describe("toOpenAIInput: data widgets", () => {
 
   test("a failed fetch passes its reason on", () => {
     expect(outputFor({ status: "error", message: "Couldn't find a place called “Oslo”." })).toBe(
-      "Not shown: Couldn't find a place called “Oslo”. The user saw this error instead."
+      "Not shown: Couldn't find a place called “Oslo”. The user saw this error instead. Tell them briefly and suggest what they could do (e.g. check the spelling, add the country)."
     )
   })
 

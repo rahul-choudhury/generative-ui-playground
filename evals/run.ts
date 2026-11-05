@@ -10,6 +10,7 @@
  * if any case fails.
  */
 import { mkdir } from "node:fs/promises"
+import { model, reasoningEffort } from "../server/llm/openai"
 import { cases } from "./cases"
 import { runCase, type Case, type CaseRun, type TurnOutcome } from "./harness"
 
@@ -41,7 +42,7 @@ async function worker() {
     process.stdout.write(`\r  ${++done}/${selected.length * runs} runs`)
   }
 }
-console.log(`Running ${selected.length} case(s) × ${runs} run(s)…`)
+console.log(`Running ${selected.length} case(s) × ${runs} run(s) on ${model}${reasoningEffort ? ` (effort: ${reasoningEffort})` : ""}…`)
 await Promise.all(Array.from({ length: concurrency }, worker))
 process.stdout.write("\r")
 
@@ -94,7 +95,11 @@ const file = `evals/results/${new Date().toISOString().replace(/[:.]/g, "-")}.js
 await Bun.write(
   file,
   JSON.stringify(
-    selected.map((c) => ({ group: c.group, name: c.name, runs: results.get(c) })),
+    {
+      model,
+      reasoningEffort: reasoningEffort ?? "default",
+      cases: selected.map((c) => ({ group: c.group, name: c.name, runs: results.get(c) })),
+    },
     null,
     2
   )
