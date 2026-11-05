@@ -19,8 +19,7 @@ export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCar
     >
       <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
         <div className="min-w-0">
-          {/* Instrument Serif has one weight; bolding it would be synthetic. */}
-          <h3 className="font-serif text-[2rem] leading-tight font-normal text-balance">
+          <h3 className="font-serif text-[2rem] leading-tight font-semibold text-balance">
             {subject}
           </h3>
           <p className="font-serif text-lg leading-snug text-text-muted italic">{descriptor}</p>
@@ -28,8 +27,8 @@ export function FactCard({ subject, descriptor, headline, facts, asOf }: FactCar
 
         {headline && (
           <div className="@sm:text-right">
-            {/* Instrument Serif's digits are lining by default. No tracking
-                change: they're already narrow and touch if tightened. */}
+            {/* The serif's digits are lining by default. Proportional (not
+                tabular) spacing: tnum spreads "14.18M" apart at this size. */}
             <p className="font-serif text-[2.25rem] leading-none">
               {headline.value}
             </p>

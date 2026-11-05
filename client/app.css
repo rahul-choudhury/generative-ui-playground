@@ -3,13 +3,14 @@
 
 /* Self-hosted so it looks the same on every platform (the library's serif
    stack resolves to Georgia, New York or a Linux default depending on the
-   browser). Instrument Serif: condensed, tall, lining figures by default.
-   Only a regular weight exists, so use it unbolded. */
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
+   browser). Libre Caslon Condensed: a narrow Caslon with lining figures by
+   default. Only the weights/styles in use are loaded. */
+@import "@fontsource/libre-caslon-condensed/400.css";
+@import "@fontsource/libre-caslon-condensed/400-italic.css";
+@import "@fontsource/libre-caslon-condensed/600.css";
 
 @theme {
-  --font-serif: "Instrument Serif", ui-serif, georgia, serif;
+  --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
 }
 
 /* Tailwind only scans the Vite root (client/) by default; widget components
