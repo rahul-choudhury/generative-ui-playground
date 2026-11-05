@@ -83,7 +83,18 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
 
   // Data widgets: the server fetches facts for these arguments next.
   let data: unknown = undefined
-  if (definition.result) {
+  let resultLoading = false
+  if (definition.result?.progressive) {
+    // Rendered now; the data fills in. A failed or bad fetch just means the
+    // widget goes without it (e.g. a recipe with no photo).
+    const fetched = part.result
+    if (fetched === undefined) resultLoading = isStreaming
+    else if (fetched.status === "ok") {
+      const parsed = definition.result.schema.safeParse(fetched.data)
+      if (parsed.success) data = parsed.data
+      else console.warn(`[widget] invalid ${part.name} result`, parsed.error.issues)
+    }
+  } else if (definition.result) {
     const fetched = part.result
     if (fetched === undefined) {
       // Show what was asked for (e.g. the place) while the fetch runs.
@@ -117,6 +128,7 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
       <entry.Component
         args={result.data}
         result={data}
+        resultLoading={resultLoading}
         // Interactive widgets start from a state derived from their arguments
         // until the user changes it.
         state={part.state ?? definition.state?.initial(result.data)}

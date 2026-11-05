@@ -43,6 +43,19 @@ export type WidgetResultConfig<Args, ResultSchema extends z.ZodType> = {
    * later turns' history, so it's identical in both.
    */
   summarize: (args: Args, data: z.infer<ResultSchema>) => string
+  /**
+   * Render as soon as the arguments arrive, with the fetched data filling in
+   * when ready (e.g. a recipe whose photo loads later). Default false: the
+   * widget waits, because the data IS the content (e.g. a forecast). A
+   * progressive widget whose fetch fails is still shown, just without it.
+   */
+  progressive?: boolean
+  /**
+   * Give the model a second pass with the fetched data, so it can answer
+   * from it (default true). False when the data is only for display (a
+   * photo): the model already said everything, and a pass would cost money.
+   */
+  continueAfter?: boolean
 }
 
 export type WidgetDefinition<
@@ -85,8 +98,14 @@ export function defineWidget<
 /** Props every finished widget component receives. */
 export type WidgetProps<Args, State, Result = undefined> = {
   args: Args
-  /** Data widgets: what the server fetched (undefined for other widgets). */
+  /**
+   * Data widgets: what the server fetched (undefined for other widgets).
+   * Progressive widgets render before it arrives, so theirs can also be
+   * undefined: type their component's result as `Result | undefined`.
+   */
   result: Result
+  /** Progressive widgets only: true while the data is still being fetched. */
+  resultLoading: boolean
   /** Current interactive state (undefined for widgets without state). */
   state: State
   /**

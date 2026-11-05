@@ -11,12 +11,14 @@ import type { ToolResult } from "../../shared/protocol"
 import type { ArgsOf, DataWidgetName, ResultOf } from "../../widgets/definitions"
 import { validateWidget } from "../../widgets/validate"
 import { ResolveError } from "./resolve-error"
+import { resolveRecipe } from "./recipe"
 import { resolveWeather } from "./weather"
 
 type Resolver<N extends DataWidgetName> = (args: ArgsOf<N>, signal: AbortSignal) => Promise<ResultOf<N>>
 
 const resolvers: { [N in DataWidgetName]: Resolver<N> } = {
   show_weather: resolveWeather,
+  show_recipe: resolveRecipe,
 }
 
 export const hasResolver = (name: string): name is DataWidgetName => Object.hasOwn(resolvers, name)

@@ -10,6 +10,7 @@
 import type { DataSource } from "../server/llm/stream"
 import type { ToolResult } from "../shared/protocol"
 import { validateWidget } from "../widgets/validate"
+import type { RecipeResult } from "../widgets/recipe/definition"
 import type { WeatherArgs, WeatherResult } from "../widgets/weather/definition"
 
 export const NOT_A_PLACE = "Qwxzvaltrop"
@@ -64,13 +65,31 @@ function weatherFor(args: WeatherArgs): WeatherResult {
   }
 }
 
+/** Every recipe gets the same (real) photo, with full credit. */
+const recipePhoto: RecipeResult = {
+  image: {
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shakshuka_by_Calliopejen1.jpg/960px-Shakshuka_by_Calliopejen1.jpg",
+    width: 960,
+    height: 720,
+    article: { title: "Shakshouka", url: "https://en.wikipedia.org/wiki/Shakshouka" },
+    credit: {
+      author: "Calliopejen1",
+      license: "CC BY-SA 3.0",
+      licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0",
+      fileUrl: "https://commons.wikimedia.org/wiki/File:Shakshuka_by_Calliopejen1.jpg",
+    },
+  },
+}
+
 export const fixedData: DataSource = {
-  hasResolver: (name) => name === "show_weather",
+  hasResolver: (name) => name === "show_weather" || name === "show_recipe",
   async resolveWidget(name, args): Promise<ToolResult> {
     const validated = validateWidget(name, args)
-    if (name !== "show_weather" || validated.status !== "ok") {
+    if (validated.status !== "ok") {
       return { status: "error", message: "The request for this widget was invalid." }
     }
+    if (name === "show_recipe") return { status: "ok", data: recipePhoto }
+    if (name !== "show_weather") return { status: "error", message: "No fixed data for this widget." }
     const weatherArgs = validated.data as WeatherArgs
     if (weatherArgs.location.toLowerCase() === NOT_A_PLACE.toLowerCase()) {
       return { status: "error", message: `Couldn't find a place called “${weatherArgs.location}”.` }

@@ -16,7 +16,9 @@ export const weatherSchema = z.object({
     .int()
     .min(1)
     .max(7)
-    .describe("Days of forecast including today. 3, unless they ask about a specific day further out (max 7)."),
+    .describe(
+      "Days of forecast including today: enough to cover every day they asked about (tomorrow needs 2). 3 by default, max 7."
+    ),
   units: z
     .enum(["celsius", "fahrenheit"])
     .describe("'fahrenheit' only if the user asks for it or is clearly in the US; otherwise 'celsius'."),
@@ -110,7 +112,8 @@ function summarizeWeather(_args: WeatherArgs, data: WeatherResult) {
     "Source: Open-Meteo. Use only these figures; don't invent others.",
     // Read right before the second pass, where evals showed the model
     // answering "what should I pack?" in prose instead of with a checklist.
-    "If the user asked what to pack or wear, or for a list, show it now as a checklist based on these figures.",
+    "If the user asked what to pack or wear for a trip (several items), show that now as a checklist based on these figures.",
+    "A yes/no question ('should I bring an umbrella?', 'do I need a coat?') gets a one-sentence answer and no widget.",
   ]
   return lines.join("\n")
 }

@@ -189,7 +189,8 @@ describe("toOpenAIInput: data widgets", () => {
         "Fri 6 Nov (tomorrow): light rain, 1 to 5°C, 80% chance of precipitation.",
         "Only these 1 day(s) were fetched. For other days, show the weather again with more days.",
         "Source: Open-Meteo. Use only these figures; don't invent others.",
-        "If the user asked what to pack or wear, or for a list, show it now as a checklist based on these figures.",
+        "If the user asked what to pack or wear for a trip (several items), show that now as a checklist based on these figures.",
+        "A yes/no question ('should I bring an umbrella?', 'do I need a coat?') gets a one-sentence answer and no widget.",
       ].join("\n")
     )
   })

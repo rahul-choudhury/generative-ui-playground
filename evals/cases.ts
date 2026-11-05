@@ -3,7 +3,7 @@
  * conversation with expectations per turn. Add cases with every widget, and
  * especially cases where a widget should NOT be used.
  */
-import { args, conversation, noWidget, notUses, onlyFrom, resultStatus, text, textBefore, textNot, uses } from "./checks"
+import { args, conversation, noWidget, notUses, onlyFrom, requests, resultStatus, text, textBefore, textNot, uses } from "./checks"
 import { NOT_A_PLACE } from "./fixed-data"
 import { lastWidget, type Case } from "./harness"
 
@@ -11,6 +11,9 @@ type ChecklistArgs = { title: string; items: { label: string; checked: boolean }
 type FactCardArgs = { facts: { label: string; value: string }[] }
 type ChoicesArgs = { options: { label: string }[] }
 type WeatherArgs = { location: string; country: string | null; days: number; units: string }
+type ComparisonArgs = { subjects: string[]; rows: { values: string[] }[] }
+type StepsArgs = { steps: { when: string | null }[] }
+type RecipeArgs = { ingredients: unknown[]; steps: unknown[] }
 
 const words = (s: string) => s.trim().split(/\s+/).length
 
@@ -29,7 +32,8 @@ export const cases: Case[] = [
   {
     group: "should use",
     name: "setup steps → checklist",
-    turns: [{ user: "What are the steps to set up a new Next.js app with Tailwind?", expect: [uses("show_checklist")] }],
+    // Tasks the user will do and tick off: a checklist, not a timeline.
+    turns: [{ user: "What are the steps to set up a new Next.js app with Tailwind?", expect: [uses("show_checklist"), notUses("show_steps")] }],
   },
   {
     group: "should use",
@@ -72,11 +76,6 @@ export const cases: Case[] = [
     group: "should not use",
     name: "explanation → plain text",
     turns: [{ user: "Explain recursion with a short example.", expect: [noWidget()] }],
-  },
-  {
-    group: "should not use",
-    name: "comparison → no fact card",
-    turns: [{ user: "Compare Tokyo and Osaka for a first-time visitor.", expect: [noWidget()] }],
   },
   {
     group: "should not use",
@@ -249,5 +248,95 @@ export const cases: Case[] = [
         expect: [uses("show_weather"), onlyFrom("show_weather"), args<WeatherArgs>("show_weather", "fahrenheit", (a) => a.units === "fahrenheit")],
       },
     ],
+  },
+
+  // ─── Comparison ───────────────────────────────────────────────────────────
+  {
+    group: "comparison",
+    name: "compare two places → comparison table",
+    turns: [
+      {
+        user: "Compare Tokyo and Osaka for a first-time visitor.",
+        expect: [
+          uses("show_comparison"),
+          notUses("show_fact_card"),
+          args<ComparisonArgs>("show_comparison", "2 subjects, 3+ rows", (a) => a.subjects.length === 2 && a.rows.length >= 3),
+        ],
+      },
+    ],
+  },
+  {
+    group: "comparison",
+    name: "'X vs Y' → comparison table",
+    turns: [{ user: "Postgres vs MySQL for a small web app?", expect: [uses("show_comparison")] }],
+  },
+  {
+    group: "comparison",
+    name: "single fact about two things → plain text",
+    turns: [{ user: "Which is bigger by population, Tokyo or Osaka? One line.", expect: [noWidget()] }],
+  },
+
+  // ─── Steps / timeline ─────────────────────────────────────────────────────
+  {
+    group: "steps",
+    name: "itinerary → timeline, not checklist",
+    turns: [
+      {
+        user: "Plan a 3-day itinerary for Rome.",
+        expect: [
+          uses("show_steps"),
+          notUses("show_checklist"),
+          args<StepsArgs>("show_steps", "time markers on every step", (a) => a.steps.every((s) => s.when)),
+        ],
+      },
+    ],
+  },
+  {
+    group: "steps",
+    name: "how a process unfolds → timeline",
+    turns: [{ user: "How does a bill become a law in the US?", expect: [uses("show_steps"), notUses("show_checklist")] }],
+  },
+  {
+    group: "steps",
+    name: "a history → timeline with dates",
+    turns: [
+      {
+        user: "Give me a timeline of the Apollo 11 mission.",
+        expect: [uses("show_steps"), args<StepsArgs>("show_steps", "dated steps", (a) => a.steps.every((s) => s.when))],
+      },
+    ],
+  },
+
+  // ─── Recipe ───────────────────────────────────────────────────────────────
+  {
+    group: "recipe",
+    name: "how to make a dish → recipe, one request",
+    turns: [
+      {
+        user: "How do I make pad thai?",
+        expect: [
+          uses("show_recipe"),
+          args<RecipeArgs>("show_recipe", "4+ ingredients and 3+ steps", (a) => a.ingredients.length >= 4 && a.steps.length >= 3),
+          resultStatus("show_recipe", "ok"),
+          // The photo is decoration: no second pass, so one request.
+          requests(1),
+        ],
+      },
+    ],
+  },
+  {
+    group: "recipe",
+    name: "ask for a recipe → recipe",
+    turns: [{ user: "Give me a recipe for chocolate chip cookies.", expect: [uses("show_recipe")] }],
+  },
+  {
+    group: "recipe",
+    name: "food history → plain text",
+    turns: [{ user: "Where does pad thai come from? Two sentences.", expect: [noWidget()] }],
+  },
+  {
+    group: "recipe",
+    name: "dinner ideas → no recipe card",
+    turns: [{ user: "Give me 5 ideas for a quick weeknight dinner.", expect: [notUses("show_recipe")] }],
   },
 ]

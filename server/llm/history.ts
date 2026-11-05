@@ -105,6 +105,13 @@ function dataWidgetOutput(part: WidgetPart, args: Record<string, unknown>): stri
   const config = getDefinition(part.name)?.result
   if (!config) return null
 
+  // Progressive widgets are shown whatever happens to their fetch.
+  if (config.progressive) {
+    const data = part.result?.status === "ok" ? config.schema.safeParse(part.result.data) : null
+    if (data?.success) return config.summarize(args, data.data)
+    return "Shown to the user, without its extra data (it couldn't be loaded)."
+  }
+
   if (part.result === undefined) {
     return "Not shown: the reply was interrupted before the data was fetched."
   }

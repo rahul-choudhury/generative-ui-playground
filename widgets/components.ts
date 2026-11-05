@@ -14,6 +14,9 @@ import type { WidgetProps } from "./define"
 import type { ArgsOf, ResultOf, StateOf, WidgetName } from "./definitions"
 import { FactCard, FactCardPending } from "./fact-card/component"
 import { FactCardSkeleton } from "./fact-card/skeleton"
+import { Comparison, ComparisonPending, ComparisonSkeleton } from "./comparison/component"
+import { Recipe, RecipePending, RecipeSkeleton } from "./recipe/component"
+import { Steps, StepsPending, StepsSkeleton } from "./steps/component"
 import { Weather, WeatherPending, WeatherSkeleton } from "./weather/component"
 
 export type WidgetEntry<Args, State, Result> = {
@@ -39,6 +42,9 @@ export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>, StateOf<N>,
   show_fact_card: { Component: FactCard, Pending: FactCardPending, Skeleton: FactCardSkeleton },
   show_choices: { Component: Choices, Pending: ChoicesPending, Skeleton: ChoicesSkeleton },
   show_weather: { Component: Weather, Pending: WeatherPending, Skeleton: WeatherSkeleton },
+  show_comparison: { Component: Comparison, Pending: ComparisonPending, Skeleton: ComparisonSkeleton },
+  show_steps: { Component: Steps, Pending: StepsPending, Skeleton: StepsSkeleton },
+  show_recipe: { Component: Recipe, Pending: RecipePending, Skeleton: RecipeSkeleton },
 }
 
 /**

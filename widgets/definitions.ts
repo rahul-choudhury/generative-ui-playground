@@ -6,12 +6,15 @@
  */
 import { checklist } from "./checklist/definition"
 import { choices } from "./choices/definition"
+import { comparison } from "./comparison/definition"
 import type { z } from "zod"
 import type { WidgetDefinition } from "./define"
 import { factCard } from "./fact-card/definition"
+import { recipe } from "./recipe/definition"
+import { steps } from "./steps/definition"
 import { weather } from "./weather/definition"
 
-export const definitions = [checklist, factCard, choices, weather] as const
+export const definitions = [checklist, factCard, choices, weather, comparison, steps, recipe] as const
 
 export type WidgetName = (typeof definitions)[number]["name"]
 

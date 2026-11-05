@@ -80,3 +80,9 @@ export const conversation =
   (what: string, test: (turns: TurnOutcome[]) => boolean): Check =>
   (_turn, turns) =>
     test(turns) ? null : `expected ${what}`
+
+/** How many model requests the turn took (2 means a second pass happened). */
+export const requests =
+  (expected: number): Check =>
+  (turn) =>
+    turn.requests === expected ? null : `expected ${expected} model request(s), got ${turn.requests}`

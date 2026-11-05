@@ -5,6 +5,7 @@ import type {
   ResponseStreamEvent,
 } from "openai/resources/responses/responses"
 import type { Message, StreamEvent, ToolResult } from "../../shared/protocol"
+import { getDefinition } from "../../widgets/definitions"
 import { validateWidget } from "../../widgets/validate"
 import { hasResolver, resolveWidget } from "../widgets/resolvers"
 import { toOpenAIInput, widgetOutput } from "./history"
@@ -60,9 +61,13 @@ export async function* streamChat(
         results.set(id, result)
         yield { type: "tool-result", id, result }
       }
-      // A second pass only happens when there's fetched data to answer from
-      // (a widget it calls, e.g. a checklist, needs no further pass).
-      if (outcome.fetches.size === 0 || pass === 2) break
+      // A second pass only happens when there's fetched data the model should
+      // answer from (a checklist needs none; neither does a display-only
+      // photo, whose widget sets continueAfter: false).
+      const needsAnswer = outcome.calls.some(
+        (call) => outcome.fetches.has(call.id) && getDefinition(call.name)?.result?.continueAfter !== false
+      )
+      if (!needsAnswer || pass === 2) break
 
       // Second pass: this response's output (including encrypted reasoning,
       // which OpenAI recommends passing back between tool turns), then an
