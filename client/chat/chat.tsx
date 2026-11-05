@@ -3,14 +3,19 @@ import { EmptyState } from "@rahul-choudhury/ui/components"
 import { Composer } from "./composer"
 import { MessageList } from "./message-list"
 import { UsageBar } from "./usage-bar"
+import { useMemo } from "react"
 import { useChat } from "./use-chat"
-import { WidgetStateContext } from "./widget-state-context"
+import { WidgetActionsContext } from "./widget-actions-context"
 
 export function Chat() {
-  const { messages, isStreaming, send, stop, setWidgetState } = useChat()
+  const { messages, isStreaming, send, stop, setWidgetState, respond } = useChat()
+  const widgetActions = useMemo(
+    () => ({ setWidgetState, respond, isStreaming }),
+    [setWidgetState, respond, isStreaming]
+  )
 
   return (
-    <WidgetStateContext value={setWidgetState}>
+    <WidgetActionsContext value={widgetActions}>
       <main className="flex h-full flex-col">
         {messages.length === 0 ? (
           <div className="flex flex-1 items-center justify-center px-4">
@@ -26,6 +31,6 @@ export function Chat() {
         <UsageBar messages={messages} />
         <Composer isStreaming={isStreaming} onSend={send} onStop={stop} />
       </main>
-    </WidgetStateContext>
+    </WidgetActionsContext>
   )
 }

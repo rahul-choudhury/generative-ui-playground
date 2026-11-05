@@ -43,14 +43,23 @@ export function useChat() {
   const updateLast = (fn: (m: ChatMessage) => ChatMessage) =>
     setMessages((prev) => prev.map((m, i) => (i === prev.length - 1 ? fn(m) : m)))
 
+  /**
+   * Send a user message. `widgetUpdate` applies a widget state change in the
+   * same step (used by respond): set separately, React wouldn't have applied
+   * it yet and the snapshot would miss it.
+   */
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, widgetUpdate?: { widgetId: string; state: unknown }) => {
       const content = text.trim()
       if (!content || abortRef.current) return
 
+      const applyUpdate = (list: ChatMessage[]) =>
+        widgetUpdate ? withWidgetState(list, widgetUpdate.widgetId, widgetUpdate.state) : list
+      const current = applyUpdate(messages)
+
       // Widgets the user changed since their last message ride along as
       // snapshots; the server turns them into a note for the model.
-      const snapshots = collectSnapshots(messages)
+      const snapshots = collectSnapshots(current)
 
       const user: ChatMessage = {
         id: crypto.randomUUID(),
@@ -67,7 +76,7 @@ export function useChat() {
 
       // History to send: everything that finished cleanly, plus the new
       // user message. Client-only fields are stripped.
-      const history: Message[] = [...messages, user]
+      const history: Message[] = [...current, user]
         .filter((m) => m.status !== "error" && m.parts.length > 0)
         .map(({ id, role, parts }) => ({ id, role, parts: parts.map(toWirePart) }))
 
@@ -75,7 +84,7 @@ export function useChat() {
       // made after this one.
       const reported = new Map(snapshots.map((s) => [s.widgetId, s.state]))
       setMessages((prev) => [
-        ...prev.map((m) => ({
+        ...applyUpdate(prev).map((m) => ({
           ...m,
           parts: m.parts.map((p) =>
             p.type === "widget" && reported.has(p.id) ? { ...p, reportedState: reported.get(p.id) } : p
@@ -162,21 +171,28 @@ export function useChat() {
 
   const stop = useCallback(() => abortRef.current?.abort(), [])
 
-  /** Called by interactive widgets (e.g. a tick). Widget ids are unique. */
+  /** A silent change (e.g. a tick): reported with the next message. */
   const setWidgetState = useCallback((widgetId: string, state: unknown) => {
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.parts.some((p) => p.type === "widget" && p.id === widgetId)
-          ? {
-              ...m,
-              parts: m.parts.map((p) => (p.type === "widget" && p.id === widgetId ? { ...p, state } : p)),
-            }
-          : m
-      )
-    )
+    setMessages((prev) => withWidgetState(prev, widgetId, state))
   }, [])
 
-  return { messages, isStreaming, send, stop, setWidgetState }
+  /** An answer (e.g. picking an option): sent now, as the user's message. */
+  const respond = useCallback(
+    (widgetId: string, message: string, state?: unknown) =>
+      send(message, state === undefined ? undefined : { widgetId, state }),
+    [send]
+  )
+
+  return { messages, isStreaming, send, stop, setWidgetState, respond }
+}
+
+/** Set one widget's state. Widget ids are unique across the conversation. */
+function withWidgetState(messages: ChatMessage[], widgetId: string, state: unknown): ChatMessage[] {
+  return messages.map((m) =>
+    m.parts.some((p) => p.type === "widget" && p.id === widgetId)
+      ? { ...m, parts: m.parts.map((p) => (p.type === "widget" && p.id === widgetId ? { ...p, state } : p)) }
+      : m
+  )
 }
 
 /**

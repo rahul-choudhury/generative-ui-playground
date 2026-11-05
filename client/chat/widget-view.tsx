@@ -7,7 +7,7 @@ import { validateWidget } from "../../widgets/validate"
 import type { ClientWidgetPart } from "./use-chat"
 import { WidgetErrorBoundary } from "./widget-error-boundary"
 import { WidgetFallback, WidgetInterrupted } from "./widget-fallback"
-import { useSetWidgetState } from "./widget-state-context"
+import { useWidgetActions } from "./widget-actions-context"
 
 /**
  * Renders any registered widget part through its lifecycle:
@@ -19,7 +19,15 @@ import { useSetWidgetState } from "./widget-state-context"
  *
  * Knows no widget by name: everything comes from the registries.
  */
-export function WidgetView({ part, isStreaming }: { part: ClientWidgetPart; isStreaming: boolean }) {
+type WidgetViewProps = {
+  part: ClientWidgetPart
+  /** This widget's own message is still streaming. */
+  isStreaming: boolean
+  /** This widget's message is the last in the conversation. */
+  isLatest: boolean
+}
+
+export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
   // Re-parsed on each delta. Argument text is a few KB at most, so a full
   // parse per delta is cheaper than keeping incremental parser state.
   const partial = useMemo(
@@ -27,7 +35,7 @@ export function WidgetView({ part, isStreaming }: { part: ClientWidgetPart; isSt
     [part.argsText]
   )
 
-  const setWidgetState = useSetWidgetState()
+  const actions = useWidgetActions()
   const definition = getDefinition(part.name)
   const entry = getComponents(part.name)
 
@@ -84,7 +92,10 @@ export function WidgetView({ part, isStreaming }: { part: ClientWidgetPart; isSt
         // Interactive widgets start from a state derived from their arguments
         // until the user changes it.
         state={part.state ?? definition.state?.initial(result.data)}
-        setState={(next) => setWidgetState(part.id, next)}
+        setState={(next) => actions.setWidgetState(part.id, next)}
+        respond={(message, state) => actions.respond(part.id, message, state)}
+        // Only the newest reply can be answered, and not while one is streaming.
+        canRespond={isLatest && !actions.isStreaming}
       />
     </WidgetErrorBoundary>
   )

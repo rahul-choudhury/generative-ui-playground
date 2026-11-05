@@ -64,5 +64,20 @@ export type WidgetProps<Args, State> = {
   args: Args
   /** Current interactive state (undefined for widgets without state). */
   state: State
+  /**
+   * Change state silently: the model hears about it with the user's next
+   * message (e.g. ticking checklist items).
+   */
   setState: (next: State) => void
+  /**
+   * Send a message as the user right now, optionally with a new state, and
+   * get a reply (e.g. picking an option). For interactions that answer the
+   * model, rather than ones it should simply know about later.
+   */
+  respond: (message: string, state?: State) => void
+  /**
+   * False while a reply is streaming, or once the conversation has moved on
+   * past this widget's message. Widgets that respond should lock then.
+   */
+  canRespond: boolean
 }

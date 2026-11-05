@@ -9,6 +9,8 @@ import type { ComponentType } from "react"
 import type { z } from "zod"
 import { Checklist, ChecklistPending } from "./checklist/component"
 import { ChecklistSkeleton } from "./checklist/skeleton"
+import { Choices, ChoicesPending } from "./choices/component"
+import { ChoicesSkeleton } from "./choices/skeleton"
 import type { WidgetDefinition, WidgetProps } from "./define"
 import type { definitions, WidgetName } from "./definitions"
 import { FactCard, FactCardPending } from "./fact-card/component"
@@ -37,6 +39,7 @@ export type WidgetEntry<Args, State> = {
 export const components: { [N in WidgetName]: WidgetEntry<ArgsOf<N>, StateOf<N>> } = {
   show_checklist: { Component: Checklist, Pending: ChecklistPending, Skeleton: ChecklistSkeleton },
   show_fact_card: { Component: FactCard, Pending: FactCardPending, Skeleton: FactCardSkeleton },
+  show_choices: { Component: Choices, Pending: ChoicesPending, Skeleton: ChoicesSkeleton },
 }
 
 /**

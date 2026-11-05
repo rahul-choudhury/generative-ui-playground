@@ -67,8 +67,8 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
           the page taller than the window and gave it a second scrollbar. */}
       <div ref={scrollRef} onScroll={onScroll} className="relative h-full overflow-y-auto">
         <div className="mx-auto flex max-w-(--layout-container) flex-col gap-6 px-4 py-8">
-          {messages.map((message) => (
-            <Message key={message.id} message={message} />
+          {messages.map((message, i) => (
+            <Message key={message.id} message={message} isLatest={i === messages.length - 1} />
           ))}
         </div>
       </div>

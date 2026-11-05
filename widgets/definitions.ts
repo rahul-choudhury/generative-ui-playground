@@ -5,10 +5,11 @@
  * add it here AND in components.ts (the type check fails if you forget).
  */
 import { checklist } from "./checklist/definition"
+import { choices } from "./choices/definition"
 import type { WidgetDefinition } from "./define"
 import { factCard } from "./fact-card/definition"
 
-export const definitions = [checklist, factCard] as const
+export const definitions = [checklist, factCard, choices] as const
 
 export type WidgetName = (typeof definitions)[number]["name"]
 

@@ -5,7 +5,8 @@ import remarkGfm from "remark-gfm"
 import type { ChatMessage, ClientPart } from "./use-chat"
 import { WidgetView } from "./widget-view"
 
-export function Message({ message }: { message: ChatMessage }) {
+/** `isLatest`: the last message in the conversation (widgets in older ones lock). */
+export function Message({ message, isLatest }: { message: ChatMessage; isLatest: boolean }) {
   if (message.role === "user") {
     // Only the text is shown. Widget-state parts on this message are sent to
     // the model (as a note the server writes) but deliberately not displayed.
@@ -27,6 +28,7 @@ export function Message({ message }: { message: ChatMessage }) {
           key={part.type === "widget" ? part.id : i}
           part={part}
           isStreaming={message.status === "streaming"}
+          isLatest={isLatest}
         />
       ))}
 
@@ -52,10 +54,11 @@ const remarkPlugins = [remarkGfm]
 const rehypePlugins = [rehypeHighlight]
 
 /** One branch per part type. */
-function PartView({ part, isStreaming }: { part: ClientPart; isStreaming: boolean }) {
+function PartView(props: { part: ClientPart; isStreaming: boolean; isLatest: boolean }) {
+  const { part, isStreaming, isLatest } = props
   switch (part.type) {
     case "widget":
-      return <WidgetView part={part} isStreaming={isStreaming} />
+      return <WidgetView part={part} isStreaming={isStreaming} isLatest={isLatest} />
     case "text":
       return (
         <div className="markdown">
