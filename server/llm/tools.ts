@@ -22,3 +22,8 @@ function toOpenAITool(widget: WidgetDefinition): FunctionTool {
 }
 
 export const tools: FunctionTool[] = definitions.map(toOpenAITool)
+
+/** The tools offered for one request, minus any that aren't allowed in it. */
+export function toolsExcept(excluded: (name: string) => boolean): FunctionTool[] {
+  return tools.filter((tool) => !excluded(tool.name))
+}

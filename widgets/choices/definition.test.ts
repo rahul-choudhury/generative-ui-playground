@@ -20,7 +20,7 @@ describe("choices state", () => {
 
   test("describes a pick by its label", () => {
     expect(state.describeChange(args, { picked: null }, { picked: 1 })).toBe(
-      'In the choice "What kind of trip?": picked "Hiking".'
+      'In the choice "What kind of trip?": picked "Hiking". Answer now with what you know; state any assumptions rather than asking more questions.'
     )
   })
 
@@ -49,7 +49,7 @@ describe("choices state", () => {
         content: [
           "<widget_events>",
           "Since your last reply, the user did this in widgets shown earlier:",
-          '- In the choice "What kind of trip?": picked "City break".',
+          '- In the choice "What kind of trip?": picked "City break". Answer now with what you know; state any assumptions rather than asking more questions.',
           "</widget_events>",
         ].join("\n"),
       },

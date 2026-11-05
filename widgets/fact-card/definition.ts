@@ -38,9 +38,12 @@ export const factCard = defineWidget({
   description: [
     "Show a compact reference card of key facts about ONE specific subject:",
     "a city, country, person, company, chemical element, planet, landmark, animal and similar.",
-    "Use when the user asks for facts, stats, an overview or 'tell me about' a single subject.",
-    "Do not use for explanations, how-to answers, opinions, comparisons of several subjects,",
-    "or facts you are unsure of. Answer those in text instead.",
+    "Use when the user asks for an overview of a single subject: 'tell me about X', 'key facts about X'.",
+    "Do not use to answer one specific question, even about such a subject",
+    "('What's the capital of France?', 'How tall is Everest?'): answer those in a sentence.",
+    "Exactly one subject: if the user names two or more ('compare X and Y', 'X vs Y'), never use it;",
+    "write the comparison as text, e.g. a Markdown table.",
+    "Also not for explanations, how-to answers, opinions, or facts you are unsure of. Answer those in text instead.",
   ].join(" "),
   schema: factCardSchema,
 })

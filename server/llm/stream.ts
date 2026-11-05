@@ -1,4 +1,5 @@
 import type {
+  FunctionTool,
   ResponseInputItem,
   ResponseOutputItem,
   ResponseStreamEvent,
@@ -9,7 +10,7 @@ import { hasResolver, resolveWidget } from "../widgets/resolvers"
 import { toOpenAIInput, widgetOutput } from "./history"
 import { toUsage } from "./models"
 import { model, openai } from "./openai"
-import { tools } from "./tools"
+import { toolsExcept } from "./tools"
 import { systemPrompt } from "./system-prompt"
 
 /**
@@ -21,15 +22,35 @@ import { systemPrompt } from "./system-prompt"
  * the model only named a place, so once the server has fetched the facts
  * they're sent back to it and it continues, answering from real data.
  */
+/** Where data widgets get their data. Swappable so evals can use fixed data. */
+export type DataSource = {
+  hasResolver: (name: string) => boolean
+  resolveWidget: (name: string, args: unknown, signal: AbortSignal) => Promise<ToolResult>
+}
+
+const liveData: DataSource = { hasResolver, resolveWidget }
+
 export async function* streamChat(
   messages: Message[],
-  signal: AbortSignal
+  signal: AbortSignal,
+  data: DataSource = liveData
 ): AsyncGenerator<StreamEvent> {
   try {
     let input = toOpenAIInput(messages)
 
+    // Rules enforced by which tools are offered, not just asked for in
+    // descriptions (evals showed the model breaking them occasionally):
+    // - right after the user answered a choice, no second choice in a row
+    // - the second pass can show widgets, but can't start another fetch
+    const justAnsweredChoice = messages
+      .findLast((m) => m.role === "assistant")
+      ?.parts.some((p) => p.type === "widget" && p.name === "show_choices")
+    const excluded = (name: string, pass: number) =>
+      (justAnsweredChoice && name === "show_choices") || (pass === 2 && data.hasResolver(name))
+
     for (let pass = 1; pass <= 2; pass++) {
-      const outcome = yield* streamPass(input, { signal, final: pass === 2 })
+      const available = toolsExcept((name) => excluded(name, pass))
+      const outcome = yield* streamPass(input, { signal, tools: available, data })
       if (outcome.kind === "stopped") return // error already reported
 
       // Wait for any data still being fetched, and send it to the client.
@@ -39,6 +60,8 @@ export async function* streamChat(
         results.set(id, result)
         yield { type: "tool-result", id, result }
       }
+      // A second pass only happens when there's fetched data to answer from
+      // (a widget it calls, e.g. a checklist, needs no further pass).
       if (outcome.fetches.size === 0 || pass === 2) break
 
       // Second pass: this response's output (including encrypted reasoning,
@@ -77,7 +100,7 @@ type PassOutcome =
 /** One model request, streamed as our events. */
 async function* streamPass(
   input: ResponseInputItem[],
-  { signal, final }: { signal: AbortSignal; final: boolean }
+  { signal, tools, data }: { signal: AbortSignal; tools: FunctionTool[]; data: DataSource }
 ): AsyncGenerator<StreamEvent, PassOutcome> {
   const stream = await openai.responses.create(
     {
@@ -85,8 +108,7 @@ async function* streamPass(
       instructions: systemPrompt,
       input,
       tools,
-      // The second pass answers from the data; it can't start another fetch.
-      tool_choice: final ? "none" : "auto",
+      tool_choice: tools.length > 0 ? "auto" : "none",
       include: ["reasoning.encrypted_content"],
       stream: true,
       store: false, // stateless: the client sends the full history each time
@@ -133,7 +155,7 @@ async function* streamPass(
           yield { type: "tool-call-end", id, args }
           calls.push({ id, name, args })
           // Start fetching now, overlapping with the rest of the stream.
-          if (hasResolver(name)) fetches.set(id, resolveWidget(name, args, signal))
+          if (data.hasResolver(name)) fetches.set(id, data.resolveWidget(name, args, signal))
         }
         break
 

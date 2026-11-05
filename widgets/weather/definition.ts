@@ -108,6 +108,9 @@ function summarizeWeather(_args: WeatherArgs, data: WeatherResult) {
     }),
     `Only these ${data.daily.length} day(s) were fetched. For other days, show the weather again with more days.`,
     "Source: Open-Meteo. Use only these figures; don't invent others.",
+    // Read right before the second pass, where evals showed the model
+    // answering "what should I pack?" in prose instead of with a checklist.
+    "If the user asked what to pack or wear, or for a list, show it now as a checklist based on these figures.",
   ]
   return lines.join("\n")
 }
@@ -121,6 +124,8 @@ export const weather = defineWidget({
     "or needs it to decide something (what to wear, whether to bring an umbrella).",
     "After the card is shown you receive the actual figures and continue your reply: answer their",
     "question from those figures in a sentence or two, without repeating the whole card.",
+    "If their request also needs another widget (e.g. 'what should I pack?' needs a packing checklist),",
+    "call it then, using the figures.",
     "Never state weather figures you weren't given.",
   ].join(" "),
   schema: weatherSchema,

@@ -31,7 +31,7 @@ export const choices = defineWidget({
     "Use only when the request is ambiguous in a way that changes your answer and only the user can resolve it:",
     "e.g. 'plan a trip' (what kind?), 'pick a laptop' (main use?).",
     "Do not use when a sensible default exists (just state your assumption and answer),",
-    "for yes/no questions, or to offer next steps after an answer.",
+    "for yes/no questions, for comparisons (answer those as asked), or to offer next steps after an answer.",
     "Ask at most ONE question before giving a real answer: once the user has answered one,",
     "answer with what you know and state any remaining assumptions instead of asking again.",
     "If a 'No preference' or 'Not sure' option would make sense, that's a sign a default exists: don't ask.",
@@ -45,7 +45,9 @@ export const choices = defineWidget({
       if (after.picked === null || after.picked === before.picked) return null
       const option = args.options[after.picked]
       if (!option) return null // out of range: say nothing rather than something wrong
-      return `In the choice "${args.question}": picked "${option.label}".`
+      // The second sentence lands exactly when it matters: evals showed the
+      // model otherwise answering a pick with more questions, in text.
+      return `In the choice "${args.question}": picked "${option.label}". Answer now with what you know; state any assumptions rather than asking more questions.`
     },
   },
 })
