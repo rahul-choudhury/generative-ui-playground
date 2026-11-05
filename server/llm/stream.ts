@@ -1,4 +1,5 @@
 import type { Message, StreamEvent } from "../../shared/protocol"
+import { toUsage } from "./models"
 import { model, openai, toOpenAIInput } from "./openai"
 import { systemPrompt } from "./system-prompt"
 
@@ -29,19 +30,33 @@ export async function* streamChat(
           yield { type: "text-delta", delta: event.delta }
           break
 
-        case "response.failed":
+        // Usage only arrives in these final events. A reply cut off by Stop
+        // never gets one, so its cost stays unknown.
+        case "response.completed": {
+          const usage = toUsage(event.response)
+          if (usage) yield { type: "usage", usage }
+          break
+        }
+
+        case "response.failed": {
+          const usage = toUsage(event.response)
+          if (usage) yield { type: "usage", usage } // partial work is still billed
           yield {
             type: "error",
             message: event.response.error?.message ?? "The model failed to respond.",
           }
           return
+        }
 
-        case "response.incomplete":
+        case "response.incomplete": {
+          const usage = toUsage(event.response)
+          if (usage) yield { type: "usage", usage }
           yield {
             type: "error",
             message: `Response cut off (${event.response.incomplete_details?.reason ?? "unknown reason"}).`,
           }
           return
+        }
 
         case "error":
           yield { type: "error", message: event.message }

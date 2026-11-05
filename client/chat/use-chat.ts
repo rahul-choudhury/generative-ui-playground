@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState } from "react"
-import type { Message, StreamEvent } from "../../shared/protocol"
+import type { Message, StreamEvent, Usage } from "../../shared/protocol"
 import { readNdjson } from "./read-ndjson"
 
 /** Client-only fields on top of the wire Message. Never sent to the server. */
 export type ChatMessage = Message & {
   status: "streaming" | "done" | "stopped" | "error"
   error?: string
+  /** Assistant messages only; missing when the reply was stopped. */
+  usage?: Usage
 }
 
 export function useChat() {
@@ -61,6 +63,9 @@ export function useChat() {
           switch (event.type) {
             case "text-delta":
               updateLast((m) => appendText(m, event.delta))
+              break
+            case "usage":
+              updateLast((m) => ({ ...m, usage: event.usage }))
               break
             case "done":
               updateLast((m) => ({ ...m, status: "done" }))

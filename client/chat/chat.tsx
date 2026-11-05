@@ -2,6 +2,7 @@ import { ChatsCircleIcon } from "@phosphor-icons/react"
 import { EmptyState } from "@rahul-choudhury/ui/components"
 import { Composer } from "./composer"
 import { MessageList } from "./message-list"
+import { UsageBar } from "./usage-bar"
 import { useChat } from "./use-chat"
 
 export function Chat() {
@@ -20,6 +21,7 @@ export function Chat() {
       ) : (
         <MessageList messages={messages} />
       )}
+      <UsageBar messages={messages} />
       <Composer isStreaming={isStreaming} onSend={send} onStop={stop} />
     </main>
   )
