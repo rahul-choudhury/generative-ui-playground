@@ -4,6 +4,7 @@ import rehypeHighlight from "rehype-highlight"
 import remarkGfm from "remark-gfm"
 import type { Part } from "../../shared/protocol"
 import type { ChatMessage } from "./use-chat"
+import { WidgetView } from "./widget-view"
 
 export function Message({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
@@ -21,7 +22,11 @@ export function Message({ message }: { message: ChatMessage }) {
   return (
     <div className="flex flex-col gap-2">
       {message.parts.map((part, i) => (
-        <PartView key={i} part={part} />
+        <PartView
+          key={part.type === "widget" ? part.id : i}
+          part={part}
+          isStreaming={message.status === "streaming"}
+        />
       ))}
 
       {message.status === "streaming" && isEmpty && <TypingIndicator />}
@@ -45,9 +50,11 @@ export function Message({ message }: { message: ChatMessage }) {
 const remarkPlugins = [remarkGfm]
 const rehypePlugins = [rehypeHighlight]
 
-/** One branch per part type. Step 2 adds the widget branch here. */
-function PartView({ part }: { part: Part }) {
+/** One branch per part type. */
+function PartView({ part, isStreaming }: { part: Part; isStreaming: boolean }) {
   switch (part.type) {
+    case "widget":
+      return <WidgetView part={part} isStreaming={isStreaming} />
     case "text":
       return (
         <div className="markdown">

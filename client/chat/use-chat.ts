@@ -64,6 +64,22 @@ export function useChat() {
             case "text-delta":
               updateLast((m) => appendText(m, event.delta))
               break
+            case "tool-call-start":
+              updateLast((m) => ({
+                ...m,
+                parts: [...m.parts, { type: "widget", id: event.id, name: event.name }],
+              }))
+              break
+            case "tool-call-delta":
+              break // step 5 renders partial arguments; for now wait for the end
+            case "tool-call-end":
+              updateLast((m) => ({
+                ...m,
+                parts: m.parts.map((p) =>
+                  p.type === "widget" && p.id === event.id ? { ...p, args: event.args } : p
+                ),
+              }))
+              break
             case "usage":
               updateLast((m) => ({ ...m, usage: event.usage }))
               break

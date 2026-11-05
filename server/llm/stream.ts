@@ -25,6 +25,10 @@ export async function* streamChat(
       { signal }
     )
 
+    // Argument deltas carry OpenAI's item_id, not the call_id we use as the
+    // widget id, so remember the mapping from output_item.added.
+    const callIdByItemId = new Map<string, string>()
+
     for await (const event of stream) {
       if (LOG_EVENTS) logEvent(event)
 
@@ -32,6 +36,27 @@ export async function* streamChat(
         case "response.output_text.delta":
         case "response.refusal.delta":
           yield { type: "text-delta", delta: event.delta }
+          break
+
+        // Function calls. A reasoning item may come first, so these are
+        // tracked by id, never by output_index.
+        case "response.output_item.added":
+          if (event.item.type === "function_call") {
+            if (event.item.id) callIdByItemId.set(event.item.id, event.item.call_id)
+            yield { type: "tool-call-start", id: event.item.call_id, name: event.item.name }
+          }
+          break
+
+        case "response.function_call_arguments.delta": {
+          const id = callIdByItemId.get(event.item_id)
+          if (id) yield { type: "tool-call-delta", id, delta: event.delta }
+          break
+        }
+
+        case "response.output_item.done":
+          if (event.item.type === "function_call") {
+            yield { type: "tool-call-end", id: event.item.call_id, args: parseArgs(event.item.arguments) }
+          }
           break
 
         // Usage only arrives in these final events. A reply cut off by Stop
@@ -76,6 +101,19 @@ export async function* streamChat(
     if (signal.aborted) return // the client hit Stop; nobody is listening
     console.error(err)
     yield { type: "error", message: err instanceof Error ? err.message : "Unknown error" }
+  }
+}
+
+/**
+ * Strict mode guarantees valid JSON in practice. If it ever isn't, pass null
+ * and let the client's schema check reject it rather than crash the stream.
+ */
+function parseArgs(json: string): unknown {
+  try {
+    return JSON.parse(json)
+  } catch {
+    console.error("[llm] unparseable tool arguments:", json)
+    return null
   }
 }
 

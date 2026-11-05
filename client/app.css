@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@rahul-choudhury/ui/tokens.css";
 
+/* Tailwind only scans the Vite root (client/) by default; widget components
+   live outside it, so their classes must be added explicitly. */
+@source "../widgets";
+
 @layer base {
 
   html,

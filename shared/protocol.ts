@@ -12,8 +12,19 @@ export const TextPartSchema = z.object({
   text: z.string(),
 })
 
-// Step 2 adds a widget part to this union.
-export const PartSchema = z.discriminatedUnion("type", [TextPartSchema])
+/**
+ * A widget the model asked to show. `id` is the provider's tool-call id.
+ * `args` is undefined while the arguments are still streaming, and is NOT
+ * validated here: the client checks it against the widget's own schema.
+ */
+export const WidgetPartSchema = z.object({
+  type: z.literal("widget"),
+  id: z.string(),
+  name: z.string(),
+  args: z.unknown().optional(),
+})
+
+export const PartSchema = z.discriminatedUnion("type", [TextPartSchema, WidgetPartSchema])
 
 export const MessageSchema = z.object({
   id: z.string(),
@@ -26,6 +37,7 @@ export const ChatRequestSchema = z.object({
 })
 
 export type TextPart = z.infer<typeof TextPartSchema>
+export type WidgetPart = z.infer<typeof WidgetPartSchema>
 export type Part = z.infer<typeof PartSchema>
 export type Message = z.infer<typeof MessageSchema>
 export type ChatRequest = z.infer<typeof ChatRequestSchema>
@@ -57,6 +69,11 @@ export type Usage = {
 
 export type StreamEvent =
   | { type: "text-delta"; delta: string }
+  // A widget call: start (name known, args not yet), raw argument chunks
+  // (unused until step 5's partial rendering), then the parsed arguments.
+  | { type: "tool-call-start"; id: string; name: string }
+  | { type: "tool-call-delta"; id: string; delta: string }
+  | { type: "tool-call-end"; id: string; args: unknown }
   | { type: "usage"; usage: Usage }
   | { type: "done" }
   | { type: "error"; message: string }
