@@ -1,7 +1,8 @@
 import type { ResponseStreamEvent } from "openai/resources/responses/responses"
 import type { Message, StreamEvent } from "../../shared/protocol"
 import { toUsage } from "./models"
-import { model, openai, toOpenAIInput, tools } from "./openai"
+import { model, openai, toOpenAIInput } from "./openai"
+import { tools } from "./tools"
 import { systemPrompt } from "./system-prompt"
 
 /**

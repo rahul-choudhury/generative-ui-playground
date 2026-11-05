@@ -3,6 +3,7 @@
  * the shape of its arguments. No React here, so the server can import it.
  */
 import { z } from "zod"
+import { defineWidget } from "../define"
 
 export const checklistSchema = z.object({
   title: z.string().describe("Short heading for the list, e.g. 'Tokyo packing list'."),
@@ -20,8 +21,9 @@ export const checklistSchema = z.object({
 
 export type ChecklistArgs = z.infer<typeof checklistSchema>
 
-export const checklist = {
+export const checklist = defineWidget({
   name: "show_checklist",
+  label: "checklist",
   description: [
     "Show the user an interactive checklist they can tick off.",
     "Use when the answer is a set of discrete things to do, bring, buy or check:",
@@ -29,4 +31,4 @@ export const checklist = {
     "Do not use for explanations, comparisons, or facts, even if they could be bullet points.",
   ].join(" "),
   schema: checklistSchema,
-} as const
+})

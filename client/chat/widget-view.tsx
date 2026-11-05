@@ -1,51 +1,50 @@
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import type { WidgetPart } from "../../shared/protocol"
-import { Checklist } from "../../widgets/checklist/component"
-import { checklist } from "../../widgets/checklist/definition"
+import { getComponents } from "../../widgets/components"
+import { getDefinition } from "../../widgets/definitions"
 
 /**
- * Turns a widget part into a component. Hand-wired to the one widget we have;
- * step 3 replaces the `if` with a registry lookup, and step 4 replaces the
- * one-line errors with proper fallbacks.
+ * Renders any registered widget part. Knows no widget by name: everything
+ * comes from the registries. Step 4 replaces the one-line notes with proper
+ * fallbacks.
  */
 export function WidgetView({ part, isStreaming }: { part: WidgetPart; isStreaming: boolean }) {
-  if (part.name !== checklist.name) {
+  const definition = getDefinition(part.name)
+  const entry = getComponents(part.name)
+
+  if (!definition || !entry) {
     return <WidgetNote>The assistant tried to show an unknown widget “{part.name}”.</WidgetNote>
   }
 
   // Arguments haven't finished streaming yet.
   if (part.args === undefined) {
-    return isStreaming ? (
-      <ChecklistSkeleton />
-    ) : (
-      <WidgetNote>The checklist was interrupted before it finished.</WidgetNote>
+    if (!isStreaming) {
+      return <WidgetNote>The {definition.label} was interrupted before it finished.</WidgetNote>
+    }
+    const Placeholder = entry.Skeleton ?? GenericSkeleton
+    return (
+      <div aria-busy="true" aria-label={`Preparing ${definition.label}`}>
+        <Placeholder />
+      </div>
     )
   }
 
   // The model's arguments are untrusted input: check them before rendering.
-  const parsed = checklist.schema.safeParse(part.args)
+  const parsed = definition.schema.safeParse(part.args)
   if (!parsed.success) {
-    console.warn("[widget] invalid checklist args", parsed.error.issues, part.args)
-    return <WidgetNote>The checklist couldn’t be displayed (invalid data).</WidgetNote>
+    console.warn(`[widget] invalid ${part.name} args`, parsed.error.issues, part.args)
+    return <WidgetNote>The {definition.label} couldn’t be displayed (invalid data).</WidgetNote>
   }
 
-  return <Checklist {...parsed.data} />
+  return <entry.Component {...parsed.data} />
 }
 
-function ChecklistSkeleton() {
+function GenericSkeleton() {
   return (
-    <Card variant="bordered" className="overflow-hidden" aria-busy="true" aria-label="Preparing checklist">
-      <div className="border-b border-border px-4 py-3.5">
-        <Skeleton className="h-4 w-40" />
-      </div>
-      <div className="flex flex-col gap-3 px-4 py-3.5">
-        {[72, 56, 64].map((width) => (
-          <div key={width} className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded-sm" />
-            <Skeleton className="h-3.5" style={{ width: `${width}%` }} />
-          </div>
-        ))}
-      </div>
+    <Card variant="bordered" className="flex flex-col gap-3 p-4">
+      <Skeleton className="h-4 w-1/3" />
+      <Skeleton className="h-3.5 w-2/3" />
+      <Skeleton className="h-3.5 w-1/2" />
     </Card>
   )
 }
