@@ -6,7 +6,8 @@
     "dev": "concurrently -k -n server,client -c blue,magenta \"bun run dev:server\" \"bun run dev:client\"",
     "dev:server": "bun --watch server/index.ts",
     "dev:client": "vite",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

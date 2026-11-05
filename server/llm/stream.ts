@@ -1,7 +1,9 @@
 import type { ResponseStreamEvent } from "openai/resources/responses/responses"
 import type { Message, StreamEvent } from "../../shared/protocol"
+import { validateWidget } from "../../widgets/validate"
+import { toOpenAIInput } from "./history"
 import { toUsage } from "./models"
-import { model, openai, toOpenAIInput } from "./openai"
+import { model, openai } from "./openai"
 import { tools } from "./tools"
 import { systemPrompt } from "./system-prompt"
 
@@ -56,7 +58,9 @@ export async function* streamChat(
 
         case "response.output_item.done":
           if (event.item.type === "function_call") {
-            yield { type: "tool-call-end", id: event.item.call_id, args: parseArgs(event.item.arguments) }
+            const args = parseArgs(event.item.arguments)
+            logIfUnrenderable(event.item.name, args)
+            yield { type: "tool-call-end", id: event.item.call_id, args }
           }
           break
 
@@ -115,6 +119,19 @@ function parseArgs(json: string): unknown {
   } catch {
     console.error("[llm] unparseable tool arguments:", json)
     return null
+  }
+}
+
+/**
+ * The client shows a fallback for these; logging here puts the reason in the
+ * server terminal too, not just the browser console. Args still go to the
+ * client unchanged: it renders the fallback (with details) itself.
+ */
+function logIfUnrenderable(name: string, args: unknown) {
+  const result = validateWidget(name, args)
+  if (result.status === "unknown") console.warn(`[widget] unknown widget "${name}"`)
+  if (result.status === "invalid") {
+    console.warn(`[widget] invalid ${name} arguments:\n  ${result.issues.join("\n  ")}`)
   }
 }
 

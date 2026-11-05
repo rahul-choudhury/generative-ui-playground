@@ -3,14 +3,14 @@
  * the shape of its arguments. No React here, so the server can import it.
  */
 import { z } from "zod"
-import { defineWidget } from "../define"
+import { defineWidget, text } from "../define"
 
 export const checklistSchema = z.object({
-  title: z.string().describe("Short heading for the list, e.g. 'Tokyo packing list'."),
+  title: text().describe("Short heading for the list, e.g. 'Tokyo packing list'."),
   items: z
     .array(
       z.object({
-        label: z.string().describe("One concrete, actionable item. No numbering."),
+        label: text().describe("One concrete, actionable item. No numbering."),
         checked: z
           .boolean()
           .describe("True only if the user said this item is already done."),

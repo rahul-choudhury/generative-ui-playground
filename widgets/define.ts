@@ -2,7 +2,14 @@
  * The shape every widget definition follows. No React: definitions are
  * imported by the server to build the model's tools.
  */
-import type { z } from "zod"
+import { z } from "zod"
+
+/**
+ * A string the model must actually fill in. OpenAI strict mode enforces the
+ * resulting minLength (no ""), but not "non-blank": it was observed sending
+ * " " and ". ". trim() runs in Zod only, so blank values fail validation.
+ */
+export const text = () => z.string().trim().min(1)
 
 export type WidgetDefinition<
   Name extends string = string,
