@@ -46,18 +46,20 @@ export function Weather({ result }: WidgetProps<WeatherArgs, undefined, WeatherR
           </p>
         </div>
 
-        <div className="flex items-center gap-3 @sm:text-right">
-          <WeatherIcon kind={now.kind} night={!current.isDay} size={36} className="shrink-0 text-text-secondary" />
-          <div>
-            <p className="font-serif text-[2.75rem] leading-none">
+        <div className="@sm:text-right">
+          {/* Icon and temperature share one line, so the icon always sits
+              right beside the number, whatever the condition text's width. */}
+          <p className="flex items-center gap-2 @sm:justify-end">
+            <WeatherIcon kind={now.kind} night={!current.isDay} size={32} className="shrink-0 text-text-secondary" />
+            <span className="font-serif text-[2.75rem] leading-none">
               {Math.round(current.temperature)}
               <span className="text-[0.55em] align-top text-text-muted">{deg}</span>
-            </p>
-            <p className="mt-1 text-sm text-text-secondary">
-              {now.label}
-              <span className="text-text-muted"> · feels {Math.round(current.feelsLike)}°</span>
-            </p>
-          </div>
+            </span>
+          </p>
+          <p className="mt-1 text-sm text-text-secondary">
+            {now.label}
+            <span className="text-text-muted"> · feels {Math.round(current.feelsLike)}°</span>
+          </p>
         </div>
       </header>
 
