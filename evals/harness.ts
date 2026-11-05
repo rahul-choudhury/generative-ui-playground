@@ -40,6 +40,8 @@ export type TurnOutcome = {
   /** Model requests made (2 for a data widget's second pass). */
   requests: number
   costUsd: number
+  /** Wall-clock time for the whole turn, both passes included. */
+  ms: number
   error?: string
 }
 
@@ -155,6 +157,7 @@ async function runTurn(messages: Message[], timeoutMs: number): Promise<TurnOutc
     }
   }
 
+  const started = performance.now()
   const signal = AbortSignal.timeout(timeoutMs)
   try {
     for await (const event of streamChat(messages, signal, fixedData)) apply(event)
@@ -168,6 +171,7 @@ async function runTurn(messages: Message[], timeoutMs: number): Promise<TurnOutc
     text: parts.flatMap((p) => (p.type === "text" ? [p.text] : [])).join("\n").trim(),
     requests,
     costUsd,
+    ms: Math.round(performance.now() - started),
     error,
   }
 }

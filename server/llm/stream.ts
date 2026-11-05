@@ -10,7 +10,7 @@ import { validateWidget } from "../../widgets/validate"
 import { hasResolver, resolveWidget } from "../widgets/resolvers"
 import { toOpenAIInput, widgetOutput } from "./history"
 import { toUsage } from "./models"
-import { model, openai } from "./openai"
+import { model, openai, reasoningEffort } from "./openai"
 import { toolsExcept } from "./tools"
 import { systemPrompt } from "./system-prompt"
 
@@ -115,6 +115,7 @@ async function* streamPass(
       tools,
       tool_choice: tools.length > 0 ? "auto" : "none",
       include: ["reasoning.encrypted_content"],
+      ...(reasoningEffort ? { reasoning: { effort: reasoningEffort } } : {}),
       stream: true,
       store: false, // stateless: the client sends the full history each time
     },
