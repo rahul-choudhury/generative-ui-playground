@@ -1,0 +1,26 @@
+import { ChatsCircleIcon } from "@phosphor-icons/react"
+import { EmptyState } from "@rahul-choudhury/ui/components"
+import { Composer } from "./composer"
+import { MessageList } from "./message-list"
+import { useChat } from "./use-chat"
+
+export function Chat() {
+  const { messages, isStreaming, send, stop } = useChat()
+
+  return (
+    <main className="flex h-full flex-col">
+      {messages.length === 0 ? (
+        <div className="flex flex-1 items-center justify-center px-4">
+          <EmptyState
+            icon={<ChatsCircleIcon size={32} />}
+            title="Generative UI playground"
+            description="Ask anything. Widgets come in step 2."
+          />
+        </div>
+      ) : (
+        <MessageList messages={messages} />
+      )}
+      <Composer isStreaming={isStreaming} onSend={send} onStop={stop} />
+    </main>
+  )
+}
