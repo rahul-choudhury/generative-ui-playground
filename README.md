@@ -2,6 +2,8 @@
 
 A chat where the model can answer with interactive components instead of only Markdown: checklists, fact cards, comparison tables, timelines, choices, weather and recipes.
 
+https://github.com/user-attachments/assets/c1ddef55-7924-484b-a855-98a6004d400b
+
 ## How it works
 
 1. Each widget is a **tool** with a Zod schema. The model calls it, and its arguments stream to the client.
