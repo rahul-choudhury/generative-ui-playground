@@ -31,14 +31,8 @@ export function ModelSelect({ models, selected, onSelect }: Props) {
       >
         <SelectValue>{(value: string) => labelFor(value)}</SelectValue>
       </SelectTrigger>
-      {/* The library's SelectContent always centres the menu on the trigger.
-          The menu is wider, so shift it right by half the difference to line
-          up their left edges (--anchor-width is the trigger's width). */}
-      <SelectContent
-        side="top"
-        alignItemWithTrigger={false}
-        className="min-w-64 translate-x-[calc((100%-var(--anchor-width))/2)]"
-      >
+      {/* The menu is wider than the trigger, so line up their left edges. */}
+      <SelectContent side="top" align="start" alignItemWithTrigger={false} className="min-w-64">
         {/* Column headings for sighted users; each row spells them out for
             screen readers instead. */}
         <div aria-hidden className={`${COLUMNS} px-2.5 pt-2 pb-1 text-[11px] text-text-muted`}>
