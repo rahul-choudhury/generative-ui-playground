@@ -3,7 +3,7 @@ import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 /** Mirrors FactCard: name + descriptor, headline figure, leader rows. */
 export function FactCardSkeleton() {
   return (
-    <Card variant="bordered" className="max-w-[36rem] px-5 pt-5 pb-4 sm:px-6">
+    <Card className="max-w-[36rem] px-5 pt-5 pb-4 sm:px-6">
       <div className="flex items-end justify-between gap-8">
         <div className="flex flex-col gap-2">
           <Skeleton className="h-7 w-36" />

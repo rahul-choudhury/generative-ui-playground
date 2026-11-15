@@ -32,7 +32,6 @@ export function Weather({ result }: WidgetProps<WeatherArgs, undefined, WeatherR
 
   return (
     <Card
-      variant="bordered"
       className="@container max-w-xl overflow-hidden"
       role="region"
       aria-label={`Weather for ${placeLabel(place)}`}
@@ -118,7 +117,6 @@ export function WeatherPending({ partial, interrupted = false }: { partial: unkn
   const location = asString(asObject(partial).location)
   return (
     <Card
-      variant="bordered"
       className="max-w-xl overflow-hidden"
       aria-busy={!interrupted || undefined}
       aria-label={location ? `Fetching weather for ${location}` : "Fetching weather"}
@@ -130,7 +128,7 @@ export function WeatherPending({ partial, interrupted = false }: { partial: unkn
 
 export function WeatherSkeleton() {
   return (
-    <Card variant="bordered" className="max-w-xl overflow-hidden">
+    <Card className="max-w-xl overflow-hidden">
       <WeatherSkeletonBody />
     </Card>
   )

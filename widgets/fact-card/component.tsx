@@ -69,7 +69,6 @@ function FactCardLayout({ subject, descriptor, headline, facts, asOf, pending = 
 
   return (
     <Card
-      variant="bordered"
       // Narrower than the chat column: an entry, not a table. Keeps the
       // dotted leaders short enough to guide the eye.
       // @container: fact rows adapt to the card's width, not the viewport's.

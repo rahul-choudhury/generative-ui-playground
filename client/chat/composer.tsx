@@ -47,7 +47,8 @@ export function Composer({ isStreaming, onSend, onStop }: ComposerProps) {
           aria-label="Message"
           rows={1}
           autoFocus
-          className="max-h-48 resize-none border-0 bg-transparent field-sizing-content focus-visible:ring-0"
+          variant="bare"
+          className="max-h-48 resize-none field-sizing-content"
         />
         {isStreaming ? (
           <Button type="button" variant="secondary" size="icon" onClick={onStop} aria-label="Stop">

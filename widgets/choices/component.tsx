@@ -53,7 +53,6 @@ function ChoicesLayout({ question, options, picked, onPick, pending = false }: L
 
   return (
     <Card
-      variant="bordered"
       className="max-w-xl overflow-hidden"
       role="group"
       aria-labelledby={question !== undefined ? questionId : undefined}

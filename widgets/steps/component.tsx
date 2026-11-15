@@ -38,7 +38,6 @@ function StepsLayout({ title, steps, pending = false }: LayoutProps) {
 
   return (
     <Card
-      variant="bordered"
       className="max-w-xl px-5 pt-5 pb-2 sm:px-6"
       role="region"
       aria-label={title ?? "Timeline"}
@@ -81,7 +80,7 @@ function StepsLayout({ title, steps, pending = false }: LayoutProps) {
 
 export function StepsSkeleton() {
   return (
-    <Card variant="bordered" className="max-w-xl px-5 pt-5 pb-4 sm:px-6">
+    <Card className="max-w-xl px-5 pt-5 pb-4 sm:px-6">
       <Skeleton className="h-7 w-48" />
       <div className="mt-5 flex flex-col gap-4">
         {[60, 72, 48].map((width) => (

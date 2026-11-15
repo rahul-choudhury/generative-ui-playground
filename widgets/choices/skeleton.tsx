@@ -3,7 +3,7 @@ import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 /** Mirrors Choices: a question line, then option rows. */
 export function ChoicesSkeleton() {
   return (
-    <Card variant="bordered" className="max-w-xl overflow-hidden">
+    <Card className="max-w-xl overflow-hidden">
       <div className="px-4 pt-4 pb-3">
         <Skeleton className="my-1 h-5 w-2/3" />
       </div>

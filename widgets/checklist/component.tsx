@@ -62,7 +62,6 @@ function ChecklistLayout({ title, labels, checked, onToggle, pending = false, in
 
   return (
     <Card
-      variant="bordered"
       className="overflow-hidden"
       role="region"
       aria-label={title ?? "Checklist"}

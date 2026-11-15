@@ -1,5 +1,5 @@
 import { cn } from "@rahul-choudhury/ui"
-import { Popover, PopoverContent, PopoverTrigger } from "@rahul-choudhury/ui/components"
+import { Button, Popover, PopoverContent, PopoverTrigger } from "@rahul-choudhury/ui/components"
 import type { ChatMessage } from "./use-chat"
 import {
   formatTokens,
@@ -28,11 +28,13 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
     <div className="ml-auto">
       <Popover>
         <PopoverTrigger
-          className={cn(
-            "flex items-center gap-2 rounded-md px-2 py-1 text-xs text-text-muted tabular-nums",
-            "cursor-pointer transition-colors hover:bg-surface-soft hover:text-text-secondary",
-            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          )}
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto gap-2 px-2 py-1 text-xs font-normal text-text-muted tabular-nums hover:text-text-secondary"
+            />
+          }
           aria-label="Context and cost details"
         >
           {max !== null && (

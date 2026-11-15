@@ -53,7 +53,6 @@ function RecipeLayout(props: LayoutProps) {
 
   return (
     <Card
-      variant="bordered"
       className="@container overflow-hidden"
       role="region"
       aria-label={dish ? `Recipe: ${dish}` : "Recipe"}
@@ -162,7 +161,7 @@ function Photo({ image, dish }: { image: NonNullable<RecipeResult["image"]>; dis
 
 export function RecipeSkeleton() {
   return (
-    <Card variant="bordered" className="overflow-hidden">
+    <Card className="overflow-hidden">
       <div className="px-5 pt-5 pb-4 sm:px-6">
         <Skeleton className="h-8 w-40" />
         <Skeleton className="mt-2 h-4 w-56" />

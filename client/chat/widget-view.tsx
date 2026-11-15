@@ -143,7 +143,7 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
 
 function GenericSkeleton() {
   return (
-    <Card variant="bordered" className="flex flex-col gap-3 p-4">
+    <Card className="flex flex-col gap-3 p-4">
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-3.5 w-2/3" />
       <Skeleton className="h-3.5 w-1/2" />

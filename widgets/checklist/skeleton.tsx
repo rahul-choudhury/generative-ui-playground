@@ -3,7 +3,7 @@ import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 /** Shown while the checklist's arguments stream. Mirrors the real layout. */
 export function ChecklistSkeleton() {
   return (
-    <Card variant="bordered" className="overflow-hidden">
+    <Card className="overflow-hidden">
       <div className="border-b border-border px-4 py-3.5">
         <Skeleton className="h-4 w-40" />
       </div>

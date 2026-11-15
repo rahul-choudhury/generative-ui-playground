@@ -8,7 +8,7 @@
         "@base-ui/react": "^1.9.0",
         "@fontsource/libre-caslon-condensed": "^5.3.1",
         "@phosphor-icons/react": "^2.1.10",
-        "@rahul-choudhury/ui": "^0.4.0",
+        "@rahul-choudhury/ui": "^0.5.0",
         "hono": "^4.13.16",
         "openai": "^7.47.0",
         "react": "^19.3.1",
@@ -62,7 +62,7 @@
 
     "@phosphor-icons/react": ["@phosphor-icons/react@2.1.10", "", { "peerDependencies": { "react": ">= 16.8", "react-dom": ">= 16.8" } }, "sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA=="],
 
-    "@rahul-choudhury/ui": ["@rahul-choudhury/ui@0.4.0", "", { "dependencies": { "@phosphor-icons/react": "^2.1.10", "clsx": "^2.1.1", "tailwind-merge": "^3.7.0" }, "peerDependencies": { "@base-ui/react": "^1.8.0", "react": "^19.3.0", "react-dom": "^19.3.0", "tailwindcss": "^4.0.0" } }, "sha512-SkahNyuRGRlIifb8OAazkAqidZ0b/fhbprMOv8wZvy/3b4/R+O56phVLqVxWi9pIv2WZBuXlsxq0efGj0wo5GQ=="],
+    "@rahul-choudhury/ui": ["@rahul-choudhury/ui@0.5.0", "", { "dependencies": { "@phosphor-icons/react": "^2.1.10", "clsx": "^2.1.1", "tailwind-merge": "^3.7.0" }, "peerDependencies": { "@base-ui/react": "^1.8.0", "react": "^19.3.0", "react-dom": "^19.3.0", "tailwindcss": "^4.0.0" } }, "sha512-c5LMOXAHCD19bpC+1XolASiX9OFr7a5ZsAY70Tp1dlWqai9zm7Rx5yWJZggeqcCYb68hYqoOdJrjx5FVkZIblw=="],
 
     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.2.16", "", { "os": "android", "cpu": "arm" }, "sha512-ia3DwAs0OsMGS7+IConptSiyk9pEXkOx/AbJ2n/lAGxH3QkWQus1t8d7gnAT38FCU2sQu8lUbeR6AiZFv4JxaA=="],
 

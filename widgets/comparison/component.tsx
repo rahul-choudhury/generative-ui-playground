@@ -41,7 +41,6 @@ function ComparisonLayout({ title, subjects, rows, verdict, pending = false }: L
 
   return (
     <Card
-      variant="bordered"
       className="overflow-hidden"
       role="region"
       aria-label={subjects.length ? `Comparison of ${subjects.join(", ")}` : "Comparison"}
@@ -115,7 +114,7 @@ function ComparisonLayout({ title, subjects, rows, verdict, pending = false }: L
 
 export function ComparisonSkeleton() {
   return (
-    <Card variant="bordered" className="overflow-hidden">
+    <Card className="overflow-hidden">
       <div className="flex gap-8 px-5 pt-4 pb-3 sm:px-6">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-5 w-24" />

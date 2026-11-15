@@ -26,8 +26,9 @@ export function ModelSelect({ models, selected, onSelect }: Props) {
   return (
     <Select size="sm" value={selected} onValueChange={(value) => value && onSelect(value as string)}>
       <SelectTrigger
+        variant="ghost"
         aria-label="Model for the next message"
-        className="h-7 w-auto gap-1 border-transparent bg-transparent px-2 text-xs text-text-muted hover:border-transparent hover:bg-surface-soft hover:text-text-secondary data-popup-open:border-transparent data-popup-open:bg-surface-soft"
+        className="h-7 w-auto gap-1 px-2 text-xs text-text-muted hover:text-text-secondary data-popup-open:text-text-secondary"
       >
         <SelectValue>{(value: string) => labelFor(value)}</SelectValue>
       </SelectTrigger>
