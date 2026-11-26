@@ -8,6 +8,7 @@ import { UsageBar } from "./usage-bar"
 import { useChat } from "./use-chat"
 import { useModels } from "./use-models"
 import { WidgetActionsContext } from "./widget-actions-context"
+import styles from "./chat.module.css"
 
 export function Chat() {
   const { models, selected, select } = useModels()
@@ -19,9 +20,9 @@ export function Chat() {
 
   return (
     <WidgetActionsContext value={widgetActions}>
-      <main className="flex h-full flex-col">
+      <main className={styles.main}>
         {messages.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center px-4">
+          <div className={styles.empty}>
             <EmptyState
               icon={<ChatsCircleIcon size={32} />}
               title="Generative UI playground"
@@ -31,8 +32,7 @@ export function Chat() {
         ) : (
           <MessageList messages={messages} />
         )}
-        {/* Model on the left, context and cost on the right. */}
-        <div className="mx-auto flex w-full max-w-(--layout-container) items-center gap-3 px-4 pb-1.5">
+        <div className={styles.bar}>
           <ModelSelect models={models} selected={selected} onSelect={select} />
           <UsageBar messages={messages} />
         </div>

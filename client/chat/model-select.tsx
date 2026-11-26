@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rahul-choudhury/ui/components"
 import type { ModelOption } from "../../shared/protocol"
+import styles from "./model-select.module.css"
 
 type Props = {
   models: ModelOption[]
@@ -10,14 +11,9 @@ type Props = {
 // Always two decimals, so "$1.00" and "$0.10" are the same width.
 const price = (usd: number | null) => (usd === null ? "?" : `$${usd.toFixed(2)}`)
 
-// One set of fixed column widths for the header and every row, so the
-// prices line up as columns instead of following each label's length.
-const COLUMNS = "grid grid-cols-[7rem_3.25rem_3.25rem] items-baseline gap-x-3"
-
 /**
- * Which model answers the next message. Quiet like the usage indicator it
- * sits opposite: muted text that only looks like a control on hover. The
- * menu shows each model's price, since they differ by up to 20×.
+ * Which model answers the next message, styled as quietly as the usage
+ * indicator opposite. The menu shows each model's price, since they differ by up to 20×.
  */
 export function ModelSelect({ models, selected, onSelect }: Props) {
   if (models.length === 0 || !selected) return null
@@ -28,35 +24,35 @@ export function ModelSelect({ models, selected, onSelect }: Props) {
       <SelectTrigger
         variant="ghost"
         aria-label="Model for the next message"
-        className="h-7 w-auto gap-1 px-2 text-xs text-text-muted hover:text-text-secondary data-popup-open:text-text-secondary"
+        className={styles.trigger}
       >
         <SelectValue>{(value: string) => labelFor(value)}</SelectValue>
       </SelectTrigger>
       {/* The menu is wider than the trigger, so line up their left edges. */}
-      <SelectContent side="top" align="start" alignItemWithTrigger={false} className="min-w-64">
+      <SelectContent side="top" align="start" alignItemWithTrigger={false} className={styles.popup}>
         {/* Column headings for sighted users; each row spells them out for
             screen readers instead. */}
-        <div aria-hidden className={`${COLUMNS} px-2.5 pt-2 pb-1 text-[11px] text-text-muted`}>
+        <div aria-hidden className={`${styles.columns} ${styles.header}`}>
           <span>Model</span>
-          <span className="text-right">In</span>
-          <span className="text-right">Out</span>
+          <span className={styles.right}>In</span>
+          <span className={styles.right}>Out</span>
         </div>
         {models.map((model) => (
-          <SelectItem key={model.id} value={model.id} className="h-auto gap-3 py-2">
-            <span className={COLUMNS}>
+          <SelectItem key={model.id} value={model.id} className={styles.item}>
+            <span className={styles.columns}>
               <span>{model.label}</span>
-              <span className="text-right text-xs text-text-muted tabular-nums">
+              <span className={styles.price}>
                 <span className="sr-only">input </span>
                 {price(model.inputPerMillion)}
               </span>
-              <span className="text-right text-xs text-text-muted tabular-nums">
+              <span className={styles.price}>
                 <span className="sr-only">output </span>
                 {price(model.outputPerMillion)}
               </span>
             </span>
           </SelectItem>
         ))}
-        <p className="border-t border-border px-2.5 py-1.5 text-[11px] text-text-muted">
+        <p className={styles.footer}>
           USD per 1M tokens · applies to your next message
         </p>
       </SelectContent>

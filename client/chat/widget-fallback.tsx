@@ -1,4 +1,5 @@
 import { WarningCircleIcon } from "@phosphor-icons/react"
+import styles from "./widget-fallback.module.css"
 
 type FallbackProps =
   | { kind: "unknown"; name: string; args: unknown }
@@ -16,31 +17,31 @@ export function WidgetFallback(props: FallbackProps) {
   const { title, description } = copy(props)
 
   return (
-    <div role="status" className="rounded-md border border-border bg-surface px-4 py-3 text-sm">
-      <div className="flex gap-2.5">
-        <WarningCircleIcon size={18} className="mt-px shrink-0 text-warning" aria-hidden />
-        <div className="min-w-0 flex-1">
-          <p className="font-medium">{title}</p>
-          <p className="mt-0.5 text-text-muted">{description}</p>
+    <div role="status" className={styles.root}>
+      <div className={styles.layout}>
+        <WarningCircleIcon size={18} className={styles.icon} aria-hidden />
+        <div className={styles.body}>
+          <p className={styles.title}>{title}</p>
+          <p className={styles.description}>{description}</p>
 
-          <details className="group mt-2">
-            <summary className="w-fit cursor-pointer text-xs text-text-muted select-none hover:text-text-secondary">
+          <details className={styles.details}>
+            <summary className={styles.summary}>
               Details
             </summary>
-            <div className="mt-2 flex flex-col gap-2 text-xs">
+            <div className={styles.detailsBody}>
               {props.kind === "invalid" && (
-                <ul className="flex flex-col gap-0.5">
+                <ul className={styles.issues}>
                   {props.issues.map((issue) => (
-                    <li key={issue} className="font-mono text-text-secondary">
+                    <li key={issue} className={styles.code}>
                       {issue}
                     </li>
                   ))}
                 </ul>
               )}
               {props.kind === "crashed" && (
-                <p className="font-mono text-text-secondary">{props.error.message}</p>
+                <p className={styles.code}>{props.error.message}</p>
               )}
-              <pre className="max-h-48 overflow-auto rounded-sm bg-surface-soft p-2 font-mono text-[11px] leading-relaxed text-text-secondary">
+              <pre className={styles.args}>
                 {JSON.stringify(props.args, null, 2) ?? "undefined"}
               </pre>
             </div>
@@ -79,7 +80,7 @@ function copy(props: FallbackProps) {
  */
 export function WidgetInterrupted({ label, partial }: { label: string; partial: boolean }) {
   return (
-    <p className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-text-muted">
+    <p className={styles.interrupted}>
       {partial
         ? `The ${label} above is incomplete: the reply stopped before it finished.`
         : `The ${label} was interrupted before it finished.`}

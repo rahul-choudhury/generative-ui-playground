@@ -74,6 +74,19 @@ body {
   isolation: isolate;
 }
 
+/* Visually hidden, still read by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Markdown inside assistant messages. Uses only the library's tokens. */
 .markdown {
   font-size: 15px;
