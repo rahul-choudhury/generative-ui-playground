@@ -1,17 +1,18 @@
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
+import styles from "./choices.module.css"
 
 /** Mirrors Choices: a question line, then option rows. */
 export function ChoicesSkeleton() {
   return (
-    <Card className="max-w-xl overflow-hidden">
-      <div className="px-4 pt-4 pb-3">
-        <Skeleton className="my-1 h-5 w-2/3" />
+    <Card className={styles.card}>
+      <div className={styles.head}>
+        <Skeleton className={styles.questionSkeleton} />
       </div>
-      <div className="border-t border-border">
+      <div className={styles.options}>
         {[40, 52, 36].map((width) => (
-          <div key={width} className="flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0">
-            <Skeleton className="size-3.5 rounded-sm" />
-            <Skeleton className="h-3.5" style={{ width: `${width}%` }} />
+          <div key={width} className={styles.skeletonRow}>
+            <Skeleton className={styles.skeletonBox} />
+            <Skeleton className={styles.skeletonLine} style={{ width: `${width}%` }} />
           </div>
         ))}
       </div>

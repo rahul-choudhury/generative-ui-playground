@@ -1,0 +1,227 @@
+/* A container, so ingredients and method sit side by side when the card is
+   wide enough, whatever the viewport. */
+.card {
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+/* Rows only animate while pending; the finished card mounts without it. */
+.card[data-pending] .enter {
+  animation: var(--row-in);
+}
+
+.pad {
+  padding-inline: var(--space-5);
+
+  @media (width >= 40rem) {
+    padding-inline: var(--space-6);
+  }
+}
+
+.photoSkeleton {
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  border-radius: 0;
+}
+
+.header {
+  padding-top: var(--space-5);
+}
+
+.dish {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+}
+
+.dishSkeleton {
+  width: 10rem;
+  height: var(--space-8);
+}
+
+.summary {
+  color: var(--color-text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-style: italic;
+  line-height: 1.375;
+}
+
+.meta {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.columns {
+  display: grid;
+  margin-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+
+  @container (width >= 32rem) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.section {
+  padding-block: var(--space-4);
+}
+
+.ingredients {
+  @container (width >= 32rem) {
+    border-right: 1px solid var(--color-border);
+  }
+}
+
+.method {
+  border-top: 1px solid var(--color-border);
+
+  @container (width >= 32rem) {
+    border-top: 0;
+  }
+}
+
+.label {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.025em;
+  line-height: var(--text-xs-line-height);
+  text-transform: uppercase;
+}
+
+.sectionLabel {
+  margin-bottom: var(--space-2);
+}
+
+.ingredientList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.stepList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  line-height: var(--space-6);
+}
+
+.item {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.quantity {
+  width: var(--space-16);
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.number {
+  width: var(--space-4);
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--space-6);
+}
+
+.tip {
+  padding-block: var(--space-3-5);
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.375;
+}
+
+.tipLabel {
+  font-family: var(--font-sans);
+}
+
+/* Photo */
+
+.figure {
+  position: relative;
+}
+
+.photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 2;
+  object-fit: cover;
+  background: var(--color-surface-soft);
+  opacity: 0;
+  transition: opacity var(--duration-slow);
+
+  &[data-loaded] {
+    opacity: 1;
+  }
+}
+
+/* Light text on a dark scrim in both themes: it sits on the photo, not on
+   the page. */
+.credit {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  max-width: 80%;
+  overflow: hidden;
+  padding: var(--space-0-5) var(--space-1-5);
+  border-radius: var(--radius-sm);
+  background: rgb(0 0 0 / 0.55);
+  color: white;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  & a {
+    text-underline-offset: 2px;
+
+    @media (hover: hover) {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+/* Skeleton */
+
+.skeletonHeader {
+  padding-block: var(--space-5) var(--space-4);
+}
+
+.skeletonSummary {
+  width: 14rem;
+  height: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.skeletonLines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2-5);
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.skeletonLine {
+  height: var(--space-3-5);
+}

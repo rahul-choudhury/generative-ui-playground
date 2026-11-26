@@ -1,0 +1,226 @@
+.card {
+  max-width: 36rem;
+  overflow: hidden;
+}
+
+/* The finished card adapts its header to its own width. */
+.container {
+  container-type: inline-size;
+}
+
+.pad {
+  padding-inline: var(--space-5);
+
+  @media (width >= 40rem) {
+    padding-inline: var(--space-6);
+  }
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-8);
+  padding-block: var(--space-5) var(--space-4);
+}
+
+.place {
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+}
+
+.small {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+.now {
+  @container (width >= 24rem) {
+    text-align: right;
+  }
+}
+
+/* Icon and temperature share one line, so the icon always sits right beside
+   the number, whatever the condition text's width. */
+.temperatureLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  @container (width >= 24rem) {
+    justify-content: flex-end;
+  }
+}
+
+.nowIcon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.temperature {
+  font-family: var(--font-serif);
+  font-size: 2.75rem;
+  line-height: 1;
+}
+
+.unit {
+  color: var(--color-text-muted);
+  font-size: 0.55em;
+  vertical-align: top;
+}
+
+.conditions {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+/* One column per day; scrolls sideways in a narrow card instead of
+   squeezing. */
+.days {
+  display: flex;
+  overflow-x: auto;
+  border-top: 1px solid var(--color-border);
+}
+
+.day {
+  display: flex;
+  min-width: 4.75rem;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-3) var(--space-2);
+  border-right: 1px solid var(--color-border);
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.xs {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+}
+
+.dayIcon {
+  color: var(--color-text-secondary);
+}
+
+.high {
+  font-weight: var(--font-weight-medium);
+}
+
+.rain {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+
+  /* Keep the row height even when there's nothing to show. */
+  &[data-hidden] {
+    visibility: hidden;
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-2-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.wind {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.source {
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-text-secondary);
+    }
+  }
+}
+
+/* Skeleton */
+
+.skeletonHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding-block: var(--space-5) var(--space-4);
+}
+
+.skeletonPlace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeletonName {
+  width: 8rem;
+  height: var(--space-8);
+}
+
+.skeletonRegion {
+  width: 7rem;
+  height: var(--space-3-5);
+}
+
+.skeletonNow {
+  width: 6rem;
+  height: var(--space-11);
+}
+
+.skeletonDays {
+  display: flex;
+  border-top: 1px solid var(--color-border);
+}
+
+.skeletonDay {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+  border-right: 1px solid var(--color-border);
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.skeletonDayName {
+  width: var(--space-8);
+  height: var(--space-3);
+}
+
+.skeletonIcon {
+  width: var(--space-5);
+  height: var(--space-5);
+  border-radius: 9999px;
+}
+
+.skeletonTemperature {
+  width: var(--space-12);
+  height: var(--space-3-5);
+}

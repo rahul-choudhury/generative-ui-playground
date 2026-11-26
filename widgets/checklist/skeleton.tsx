@@ -1,17 +1,18 @@
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
+import styles from "./checklist.module.css"
 
 /** Shown while the checklist's arguments stream. Mirrors the real layout. */
 export function ChecklistSkeleton() {
   return (
-    <Card className="overflow-hidden">
-      <div className="border-b border-border px-4 py-3.5">
-        <Skeleton className="h-4 w-40" />
+    <Card className={styles.card}>
+      <div className={styles.skeletonHeader}>
+        <Skeleton className={styles.titleSkeleton} />
       </div>
-      <div className="flex flex-col gap-3 px-4 py-3.5">
+      <div className={styles.skeletonRows}>
         {[72, 56, 64].map((width) => (
-          <div key={width} className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded-sm" />
-            <Skeleton className="h-3.5" style={{ width: `${width}%` }} />
+          <div key={width} className={styles.skeletonRow}>
+            <Skeleton className={styles.skeletonBox} />
+            <Skeleton className={styles.skeletonLine} style={{ width: `${width}%` }} />
           </div>
         ))}
       </div>

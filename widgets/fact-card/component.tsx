@@ -1,8 +1,8 @@
-import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
 import type { FactCardArgs } from "./definition"
+import styles from "./fact-card.module.css"
 
 /**
  * An almanac entry rather than a dashboard tile: serif name with an italic
@@ -64,70 +64,42 @@ type LayoutProps = {
 }
 
 function FactCardLayout({ subject, descriptor, headline, facts, asOf, pending = false, interrupted = false }: LayoutProps) {
-  // Rows only animate while pending; the finished card mounts without it.
-  const enter = cn(pending && "motion-safe:animate-row-in")
-
   return (
     <Card
-      // Narrower than the chat column: an entry, not a table. Keeps the
-      // dotted leaders short enough to guide the eye.
-      // @container: fact rows adapt to the card's width, not the viewport's.
-      className="@container max-w-xl px-5 pt-5 pb-4 sm:px-6"
+      className={styles.card}
+      data-pending={pending || undefined}
       role="region"
       aria-label={subject ? `Facts about ${subject}` : "Fact card"}
       aria-busy={(pending && !interrupted) || undefined}
     >
-      <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-        <div className="min-w-0">
+      <header className={styles.header}>
+        <div className={styles.name}>
           {subject !== undefined ? (
-            <h3 className="font-serif text-[2rem] leading-tight font-semibold text-balance">{subject}</h3>
+            <h3 className={styles.subject}>{subject}</h3>
           ) : (
-            <Skeleton className="my-1.5 h-7 w-36" />
+            <Skeleton className={styles.subjectSkeleton} />
           )}
-          {descriptor !== undefined && (
-            <p className="font-serif text-lg leading-snug text-text-muted italic">{descriptor}</p>
-          )}
+          {descriptor !== undefined && <p className={styles.descriptor}>{descriptor}</p>}
         </div>
 
         {headline && (
-          <div className={cn("@sm:text-right", enter)}>
-            {/* The serif's digits are lining by default. Proportional (not
-                tabular) spacing: tnum spreads "14.18M" apart at this size. */}
-            <p className="font-serif text-[2.25rem] leading-none">{headline.value}</p>
-            {headline.label !== undefined && (
-              <p className="mt-1.5 text-xs text-text-muted">{headline.label}</p>
-            )}
+          <div className={`${styles.headline} ${styles.enter}`}>
+            <p className={styles.headlineValue}>{headline.value}</p>
+            {headline.label !== undefined && <p className={styles.headlineLabel}>{headline.label}</p>}
           </div>
         )}
       </header>
 
-      <dl className="mt-5 border-t border-border pt-3 text-sm">
+      <dl className={styles.facts}>
         {facts.map((fact, i) => (
-          // Narrow card: label above value, no leader. From @sm (24rem) up:
-          // one line, label …… value. Leaders need room to read as leaders.
-          <div
-            key={i}
-            className={cn(
-              "flex flex-col py-1.5 @sm:flex-row @sm:items-baseline @sm:gap-2 @sm:py-1.25",
-              enter
-            )}
-          >
-            {/* The leader is the dt's ::after, so the markup stays a valid
-                dt/dd pair and screen readers never see it. Labels don't wrap,
-                so the leader always sits on the label's line. */}
-            <dt className="text-xs text-text-muted @sm:flex @sm:flex-1 @sm:items-baseline @sm:gap-2 @sm:text-sm @sm:whitespace-nowrap @sm:text-text-secondary @sm:after:min-w-6 @sm:after:flex-1 @sm:after:translate-y-[-0.3em] @sm:after:border-b @sm:after:border-dotted @sm:after:border-border-strong @sm:after:content-['']">
-              {fact.label}
-            </dt>
-            <dd className="font-medium tabular-nums @sm:max-w-[60%] @sm:text-right">{fact.value}</dd>
+          <div key={i} className={`${styles.fact} ${styles.enter}`}>
+            <dt className={styles.label}>{fact.label}</dt>
+            <dd className={styles.value}>{fact.value}</dd>
           </div>
         ))}
       </dl>
 
-      {asOf && (
-        <p className={cn("mt-3 font-serif text-sm text-text-muted italic", enter)}>
-          Figures as of {asOf}.
-        </p>
-      )}
+      {asOf && <p className={`${styles.asOf} ${styles.enter}`}>Figures as of {asOf}.</p>}
     </Card>
   )
 }

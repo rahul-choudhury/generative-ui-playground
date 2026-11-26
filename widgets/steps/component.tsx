@@ -1,8 +1,8 @@
-import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
 import type { StepsArgs } from "./definition"
+import styles from "./steps.module.css"
 
 /**
  * A sequence on a vertical rail. Each marker is the step's "when" (Day 1,
@@ -38,38 +38,29 @@ function StepsLayout({ title, steps, pending = false }: LayoutProps) {
 
   return (
     <Card
-      className="max-w-xl px-5 pt-5 pb-2 sm:px-6"
+      className={styles.card}
+      data-pending={pending || undefined}
       role="region"
       aria-label={title ?? "Timeline"}
       aria-busy={pending || undefined}
     >
       {title !== undefined ? (
-        <h3 className="font-serif text-2xl leading-tight font-semibold">{title}</h3>
+        <h3 className={styles.title}>{title}</h3>
       ) : (
-        <Skeleton className="h-7 w-48" />
+        <Skeleton className={styles.titleSkeleton} />
       )}
 
-      <ol className="mt-4">
+      <ol className={styles.list} data-timed={timed || undefined}>
         {steps.map((step, i) => (
-          <li
-            key={i}
-            className={cn(
-              "grid gap-x-4 pb-4",
-              timed ? "grid-cols-[4.5rem_auto_1fr]" : "grid-cols-[1.5rem_auto_1fr]",
-              pending && "motion-safe:animate-row-in"
-            )}
-          >
-            <span className="pt-0.5 text-right text-xs leading-5 text-text-muted tabular-nums">
-              {timed ? step.when : i + 1}
+          <li key={i} className={styles.step}>
+            <span className={styles.marker}>{timed ? step.when : i + 1}</span>
+            <span aria-hidden className={styles.rail}>
+              <span className={styles.dot} />
+              {i < steps.length - 1 && <span className={styles.line} />}
             </span>
-            {/* The rail: a dot, and a line down to the next step. */}
-            <span aria-hidden className="relative flex justify-center">
-              <span className="mt-1.5 size-2 rounded-full border border-text-secondary bg-surface" />
-              {i < steps.length - 1 && <span className="absolute top-4 -bottom-4 w-px bg-border" />}
-            </span>
-            <div className="min-w-0">
-              <p className="text-[15px] leading-6 font-medium">{step.title}</p>
-              {step.detail && <p className="mt-0.5 text-sm leading-6 text-text-muted">{step.detail}</p>}
+            <div className={styles.body}>
+              <p className={styles.stepTitle}>{step.title}</p>
+              {step.detail && <p className={styles.detail}>{step.detail}</p>}
             </div>
           </li>
         ))}
@@ -80,14 +71,14 @@ function StepsLayout({ title, steps, pending = false }: LayoutProps) {
 
 export function StepsSkeleton() {
   return (
-    <Card className="max-w-xl px-5 pt-5 pb-4 sm:px-6">
-      <Skeleton className="h-7 w-48" />
-      <div className="mt-5 flex flex-col gap-4">
+    <Card className={`${styles.card} ${styles.skeletonCard}`}>
+      <Skeleton className={styles.titleSkeleton} />
+      <div className={styles.skeletonRows}>
         {[60, 72, 48].map((width) => (
-          <div key={width} className="grid grid-cols-[1.5rem_auto_1fr] items-center gap-x-4">
-            <Skeleton className="ml-auto h-3 w-3" />
-            <Skeleton className="size-2 rounded-full" />
-            <Skeleton className="h-3.5" style={{ width: `${width}%` }} />
+          <div key={width} className={styles.skeletonRow}>
+            <Skeleton className={styles.skeletonMarker} />
+            <Skeleton className={styles.skeletonDot} />
+            <Skeleton className={styles.skeletonLine} style={{ width: `${width}%` }} />
           </div>
         ))}
       </div>
