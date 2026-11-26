@@ -12,7 +12,7 @@ import {
   WindIcon,
   type Icon,
 } from "@phosphor-icons/react"
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import type { WidgetProps } from "../define"
 import { asObject, asString } from "../partial"

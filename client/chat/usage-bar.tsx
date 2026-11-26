@@ -1,4 +1,4 @@
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@rahul-choudhury/ui/components"
 import type { ChatMessage } from "./use-chat"
 import {

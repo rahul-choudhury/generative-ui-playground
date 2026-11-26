@@ -1,4 +1,4 @@
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Card, Checkbox, Skeleton } from "@rahul-choudhury/ui/components"
 import Markdown from "react-markdown"
 import type { WidgetProps } from "../define"

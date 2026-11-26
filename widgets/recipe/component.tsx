@@ -1,5 +1,5 @@
 import { ClockIcon, UsersIcon } from "@phosphor-icons/react"
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import { useState } from "react"
 import type { WidgetProps } from "../define"
