@@ -23,8 +23,6 @@
   margin-top: var(--space-4);
 }
 
-/* Marker, rail, text. A time marker ("Day 1", "1969") needs a wider column
-   than a step number. */
 .step {
   display: grid;
   grid-template-columns: 1.5rem auto 1fr;
@@ -35,7 +33,6 @@
     grid-template-columns: 4.5rem auto 1fr;
   }
 
-  /* Rows only animate while pending; the finished timeline mounts without it. */
   .card[data-pending] & {
     animation: var(--row-in);
   }
@@ -90,8 +87,6 @@
   font-size: var(--text-sm);
   line-height: var(--space-6);
 }
-
-/* Skeleton */
 
 .skeletonCard {
   padding-bottom: var(--space-4);

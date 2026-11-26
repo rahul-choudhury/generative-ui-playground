@@ -3,7 +3,6 @@
   overflow: hidden;
 }
 
-/* The finished card adapts its header to its own width. */
 .container {
   container-type: inline-size;
 }
@@ -158,8 +157,6 @@
     }
   }
 }
-
-/* Skeleton */
 
 .skeletonHeader {
   display: flex;

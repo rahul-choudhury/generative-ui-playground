@@ -2,7 +2,6 @@
   overflow: hidden;
 }
 
-/* Rows only animate while pending; the finished table mounts without it. */
 .card[data-pending] .enter {
   animation: var(--row-in);
 }
@@ -110,8 +109,6 @@
     padding-inline: var(--space-6);
   }
 }
-
-/* Skeleton */
 
 .skeletonHead,
 .skeletonRow {
