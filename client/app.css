@@ -26,19 +26,19 @@
 }
 
 html,
-body,
+body {
+  height: 100%;
+}
+
 #root {
   height: 100%;
+  isolation: isolate;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
   -moz-osx-font-smoothing: grayscale;
-}
-
-#root {
-  isolation: isolate;
 }
 
 .sr-only {
