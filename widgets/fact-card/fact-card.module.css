@@ -39,6 +39,10 @@
 .subjectSkeleton {
   width: 9rem;
   height: var(--space-7);
+}
+
+/* While the card streams, the placeholder fills the title's line height. */
+.name > .subjectSkeleton {
   margin-block: var(--space-1-5);
 }
 
@@ -166,11 +170,6 @@
 .skeletonRow {
   display: flex;
   justify-content: space-between;
-}
-
-.skeletonSubject {
-  width: 9rem;
-  height: var(--space-7);
 }
 
 .skeletonDescriptor {

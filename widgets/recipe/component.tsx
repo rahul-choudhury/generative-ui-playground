@@ -60,7 +60,7 @@ function RecipeLayout(props: LayoutProps) {
     >
       {imageLoading ? <Skeleton className={styles.photoSkeleton} /> : image && <Photo image={image} dish={dish} />}
 
-      <header className={`${styles.header} ${styles.pad}`}>
+      <header className={styles.header}>
         {dish ? <h3 className={styles.dish}>{dish}</h3> : <Skeleton className={styles.dishSkeleton} />}
         {summary && <p className={styles.summary}>{summary}</p>}
         {(servings || totalTime) && (
@@ -80,7 +80,7 @@ function RecipeLayout(props: LayoutProps) {
       </header>
 
       <div className={styles.columns}>
-        <section className={`${styles.section} ${styles.ingredients} ${styles.pad}`}>
+        <section className={`${styles.section} ${styles.ingredients}`}>
           <h4 className={`${styles.label} ${styles.sectionLabel}`}>Ingredients</h4>
           <ul className={styles.ingredientList}>
             {ingredients.map((ingredient, i) => (
@@ -92,7 +92,7 @@ function RecipeLayout(props: LayoutProps) {
           </ul>
         </section>
 
-        <section className={`${styles.section} ${styles.method} ${styles.pad}`}>
+        <section className={`${styles.section} ${styles.method}`}>
           <h4 className={`${styles.label} ${styles.sectionLabel}`}>Method</h4>
           <ol className={styles.stepList}>
             {steps.map((step, i) => (
@@ -106,7 +106,7 @@ function RecipeLayout(props: LayoutProps) {
       </div>
 
       {tip && (
-        <p className={`${styles.tip} ${styles.pad} ${styles.enter}`}>
+        <p className={`${styles.tip} ${styles.enter}`}>
           <span className={`${styles.label} ${styles.tipLabel}`}>Tip · </span>
           {tip}
         </p>
@@ -155,11 +155,11 @@ function Photo({ image, dish }: { image: NonNullable<RecipeResult["image"]>; dis
 export function RecipeSkeleton() {
   return (
     <Card className={styles.card}>
-      <div className={`${styles.skeletonHeader} ${styles.pad}`}>
+      <div className={styles.skeletonHeader}>
         <Skeleton className={styles.dishSkeleton} />
         <Skeleton className={styles.skeletonSummary} />
       </div>
-      <div className={`${styles.skeletonLines} ${styles.pad}`}>
+      <div className={styles.skeletonLines}>
         {[50, 64, 40].map((width) => (
           <Skeleton key={width} className={styles.skeletonLine} style={{ width: `${width}%` }} />
         ))}

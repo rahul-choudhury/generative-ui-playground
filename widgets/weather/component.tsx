@@ -36,7 +36,7 @@ export function Weather({ result }: WidgetProps<WeatherArgs, undefined, WeatherR
       role="region"
       aria-label={`Weather for ${placeLabel(place)}`}
     >
-      <header className={`${styles.header} ${styles.pad}`}>
+      <header className={styles.header}>
         <div className={styles.place}>
           <h3 className={styles.name}>{place.name}</h3>
           <p className={`${styles.small} ${styles.muted}`}>
@@ -87,7 +87,7 @@ export function Weather({ result }: WidgetProps<WeatherArgs, undefined, WeatherR
         })}
       </ol>
 
-      <footer className={`${styles.footer} ${styles.pad} ${styles.xs} ${styles.muted}`}>
+      <footer className={`${styles.footer} ${styles.xs} ${styles.muted}`}>
         <span className={`${styles.wind} ${styles.numbers}`}>
           <WindIcon size={13} aria-hidden />
           Wind {Math.round(current.windSpeed)} {units === "celsius" ? "km/h" : "mph"}
@@ -129,7 +129,7 @@ export function WeatherSkeleton() {
 function WeatherSkeletonBody({ title }: { title?: string }) {
   return (
     <>
-      <div className={`${styles.skeletonHeader} ${styles.pad}`}>
+      <div className={styles.skeletonHeader}>
         <div className={styles.skeletonPlace}>
           {title ? <h3 className={styles.name}>{title}</h3> : <Skeleton className={styles.skeletonName} />}
           <Skeleton className={styles.skeletonRegion} />

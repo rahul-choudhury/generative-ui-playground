@@ -25,10 +25,8 @@
 }
 
 .option {
-  border-bottom: 1px solid var(--color-border);
-
-  &:last-child {
-    border-bottom: 0;
+  & + & {
+    border-top: 1px solid var(--color-border);
   }
 
   .card[data-pending] & {
@@ -137,10 +135,9 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3-5) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
 
-  &:last-child {
-    border-bottom: 0;
+  & + & {
+    border-top: 1px solid var(--color-border);
   }
 }
 

@@ -1,5 +1,11 @@
 .card {
   overflow: hidden;
+  /* Horizontal padding, wider from the sm breakpoint up. */
+  --inset: var(--space-5);
+
+  @media (width >= 40rem) {
+    --inset: var(--space-6);
+  }
 }
 
 .card[data-pending] .enter {
@@ -7,14 +13,10 @@
 }
 
 .title {
-  padding: var(--space-4) var(--space-5) 0;
+  padding: var(--space-4) var(--inset) 0;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
-
-  @media (width >= 40rem) {
-    padding-inline: var(--space-6);
-  }
 }
 
 /* Wide tables scroll sideways in narrow chats; the attribute column stays
@@ -36,19 +38,19 @@
   background: var(--color-surface);
 }
 
+.subject,
+.subjectSkeletonCell {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
 .subject {
   min-width: 8rem;
-  padding: var(--space-4) var(--space-4) var(--space-3);
   font-family: var(--font-serif);
   font-size: var(--text-xl);
   font-weight: var(--font-weight-semibold);
   line-height: 1.25;
   text-align: left;
   vertical-align: bottom;
-}
-
-.subjectSkeletonCell {
-  padding: var(--space-4) var(--space-4) var(--space-3);
 }
 
 .subjectSkeleton {
@@ -63,17 +65,13 @@
 .attribute {
   position: sticky;
   left: 0;
-  padding: var(--space-2-5) var(--space-3) var(--space-2-5) var(--space-5);
+  padding: var(--space-2-5) var(--space-3) var(--space-2-5) var(--inset);
   background: var(--color-surface);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-normal);
   text-align: left;
   vertical-align: top;
   white-space: nowrap;
-
-  @media (width >= 40rem) {
-    padding-left: var(--space-6);
-  }
 }
 
 .value {
@@ -99,26 +97,18 @@
 }
 
 .verdict {
-  padding: var(--space-3-5) var(--space-5);
+  padding: var(--space-3-5) var(--inset);
   border-top: 1px solid var(--color-border);
   font-family: var(--font-serif);
   font-size: 1.05rem;
   line-height: 1.375;
-
-  @media (width >= 40rem) {
-    padding-inline: var(--space-6);
-  }
 }
 
 .skeletonHead,
 .skeletonRow {
   display: flex;
   gap: var(--space-8);
-  padding-inline: var(--space-5);
-
-  @media (width >= 40rem) {
-    padding-inline: var(--space-6);
-  }
+  padding-inline: var(--inset);
 }
 
 .skeletonHead {

@@ -7,7 +7,7 @@ export function FactCardSkeleton() {
     <Card className={styles.card}>
       <div className={styles.skeletonHeader}>
         <div className={styles.skeletonName}>
-          <Skeleton className={styles.skeletonSubject} />
+          <Skeleton className={styles.subjectSkeleton} />
           <Skeleton className={styles.skeletonDescriptor} />
         </div>
         <Skeleton className={styles.skeletonHeadline} />
