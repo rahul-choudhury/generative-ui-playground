@@ -1,4 +1,3 @@
-import { cn } from "../../shared/cn"
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@rahul-choudhury/ui/components"
 import type { ChatMessage } from "./use-chat"
 import {
@@ -8,6 +7,7 @@ import {
   formatUsdPrecise,
   summarizeUsage,
 } from "./usage"
+import styles from "./usage-bar.module.css"
 
 /**
  * "Context ▓░░ 12K / 922K · $0.0031". Click for the full breakdown.
@@ -25,30 +25,28 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
   const notCounted = s.stoppedCount + s.unpricedCount
 
   return (
-    <div className="ml-auto">
+    <div className={styles.root}>
       <Popover>
         <PopoverTrigger
           render={
             <Button
               variant="ghost"
               size="sm"
-              className="h-auto gap-2 px-2 py-1 text-xs font-normal text-text-muted tabular-nums hover:text-text-secondary"
+              className={styles.trigger}
             />
           }
           aria-label="Context and cost details"
         >
           {max !== null && (
-            <span className="relative h-1.5 w-20 overflow-hidden rounded-full bg-surface-soft">
+            <span className={styles.meter}>
               <span
-                className={cn(
-                  "absolute inset-y-0 left-0 rounded-full",
-                  isLongContext ? "bg-warning" : "bg-text-muted"
-                )}
+                className={styles.fill}
+                data-long={isLongContext || undefined}
                 style={{ width: `${Math.max(pct, 2)}%` }}
               />
               {thresholdPct !== null && (
                 <span
-                  className="absolute inset-y-0 w-px bg-warning"
+                  className={styles.threshold}
                   style={{ left: `${thresholdPct}%` }}
                 />
               )}
@@ -65,7 +63,7 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
           </span>
         </PopoverTrigger>
 
-        <PopoverContent side="top" align="end" sideOffset={6} className="w-72 text-sm">
+        <PopoverContent side="top" align="end" sideOffset={6} className={styles.popup}>
           <Section title="Context">
             <Row
               label="Used"
@@ -75,7 +73,7 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
               <Row label="" value={pct > 0 && pct < 0.1 ? "<0.1%" : `${pct.toFixed(1)}%`} sub />
             )}
             {threshold !== null && (
-              <p className="mt-1 text-xs text-text-muted">
+              <p className={styles.note}>
                 Above {formatTokensFull(threshold)} input tokens, every request is billed at
                 long-context rates (2× input, 1.5× output).
               </p>
@@ -88,13 +86,13 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
             <Row label="Cache writes" value={formatTokensFull(s.totals.cacheWrites)} sub />
             <Row label="Output" value={formatTokensFull(s.totals.output)} />
             <Row label="Reasoning" value={formatTokensFull(s.totals.reasoning)} sub />
-            <div className="mt-2 border-t border-border pt-2">
+            <div className={styles.total}>
               <Row label="Cost" value={formatUsdPrecise(s.totals.costUsd)} strong />
             </div>
           </Section>
 
           {(notCounted > 0 || s.serviceTier || s.lastModel) && (
-            <div className="mt-3 flex flex-col gap-1 text-xs text-text-muted">
+            <div className={styles.notes}>
               {s.stoppedCount > 0 && (
                 <p>
                   {s.stoppedCount} stopped {s.stoppedCount === 1 ? "reply" : "replies"} not
@@ -109,7 +107,7 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
               )}
               {s.lastModel && (
                 <p>
-                  Last reply: <span className="font-mono">{s.lastModel}</span>
+                  Last reply: <span className={styles.mono}>{s.lastModel}</span>
                   {s.modelCount > 1 && ` (this conversation used ${s.modelCount} models)`}.
                 </p>
               )}
@@ -124,8 +122,8 @@ export function UsageBar({ messages }: { messages: ChatMessage[] }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="not-first:mt-4">
-      <p className="mb-1.5 text-xs font-medium text-text-muted">{title}</p>
+    <div className={styles.section}>
+      <p className={styles.sectionTitle}>{title}</p>
       {children}
     </div>
   )
@@ -133,13 +131,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row(props: { label: string; value: string; sub?: boolean; strong?: boolean }) {
   return (
-    <div
-      className={cn(
-        "flex justify-between gap-4 py-0.5 tabular-nums",
-        props.sub && "pl-3 text-text-muted",
-        props.strong && "font-semibold"
-      )}
-    >
+    <div className={styles.row} data-sub={props.sub || undefined} data-strong={props.strong || undefined}>
       <span>{props.label}</span>
       <span>{props.value}</span>
     </div>

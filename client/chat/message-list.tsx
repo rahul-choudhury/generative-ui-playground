@@ -1,10 +1,10 @@
 import { ArrowDownIcon } from "@phosphor-icons/react"
-import { cn } from "../../shared/cn"
 import { Button } from "@rahul-choudhury/ui/components"
 import { usePrefersReducedMotion } from "@rahul-choudhury/ui/hooks"
 import { useEffect, useRef, useState } from "react"
 import { Message } from "./message"
 import type { ChatMessage } from "./use-chat"
+import styles from "./message-list.module.css"
 
 /** Within this distance of the bottom, the list counts as "at the bottom". */
 const PIN_THRESHOLD = 48
@@ -60,13 +60,9 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
   }
 
   return (
-    <div className="relative min-h-0 flex-1">
-      {/* `relative` makes the scroller the containing block for absolutely
-          positioned descendants (e.g. Tailwind's sr-only). Without it they're
-          positioned against <body> at their unscrolled offset, which pushed
-          the page taller than the window and gave it a second scrollbar. */}
-      <div ref={scrollRef} onScroll={onScroll} className="relative h-full overflow-y-auto">
-        <div className="mx-auto flex max-w-(--layout-container) flex-col gap-6 px-4 py-8">
+    <div className={styles.root}>
+      <div ref={scrollRef} onScroll={onScroll} className={styles.scroller}>
+        <div className={styles.list}>
           {messages.map((message, i) => (
             <Message key={message.id} message={message} isLatest={i === messages.length - 1} />
           ))}
@@ -76,20 +72,13 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
       {/* Outside the scroller so it stays put while the list scrolls. Hidden
           rather than unmounted so it can fade out; `inert` keeps it out of
           the tab order and away from screen readers while hidden. */}
-      <div
-        inert={!showJump}
-        className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-3 flex justify-center",
-          "transition-[opacity,translate] duration-(--duration-normal) ease-(--ease-out-quint) motion-reduce:transition-none",
-          showJump ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-        )}
-      >
+      <div inert={!showJump} data-hidden={showJump ? undefined : ""} className={styles.jump}>
         <Button
           variant="secondary"
           size="icon"
           onClick={jumpToLatest}
           aria-label="Scroll to latest message"
-          className="pointer-events-auto rounded-full shadow-md"
+          className={styles.jumpButton}
         >
           <ArrowDownIcon size={16} weight="bold" />
         </Button>

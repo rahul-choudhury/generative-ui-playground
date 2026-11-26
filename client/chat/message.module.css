@@ -1,0 +1,58 @@
+.userRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 85%;
+  padding: var(--space-2-5) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  font-size: 15px;
+  line-height: var(--space-7);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.assistant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stopped {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.error {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid color-mix(in oklab, var(--color-danger) 30%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--color-danger) 5%, transparent);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.typing {
+  display: flex;
+  height: var(--space-7);
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.dot {
+  width: var(--space-1-5);
+  height: var(--space-1-5);
+  border-radius: 9999px;
+  background: var(--color-text-muted);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}

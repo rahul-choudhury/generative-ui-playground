@@ -1,6 +1,7 @@
 import { ArrowUpIcon, StopIcon } from "@phosphor-icons/react"
 import { Button, Textarea } from "@rahul-choudhury/ui/components"
 import { useEffect, useRef, useState, type KeyboardEvent, type SyntheticEvent } from "react"
+import styles from "./composer.module.css"
 
 type ComposerProps = {
   isStreaming: boolean
@@ -36,8 +37,8 @@ export function Composer({ isStreaming, onSend, onStop }: ComposerProps) {
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto w-full max-w-(--layout-container) px-4 pb-4">
-      <div className="flex items-end gap-2 rounded-lg border border-border bg-surface p-2 shadow-sm focus-within:border-border-strong">
+    <form onSubmit={submit} className={styles.form}>
+      <div className={styles.box}>
         <Textarea
           ref={textareaRef}
           value={text}
@@ -48,7 +49,7 @@ export function Composer({ isStreaming, onSend, onStop }: ComposerProps) {
           rows={1}
           autoFocus
           variant="bare"
-          className="max-h-48 resize-none field-sizing-content"
+          className={styles.textarea}
         />
         {isStreaming ? (
           <Button type="button" variant="secondary" size="icon" onClick={onStop} aria-label="Stop">

@@ -1,0 +1,65 @@
+/* Quiet like the usage indicator it sits opposite: muted text that only
+   looks like a control on hover. */
+.trigger {
+  width: auto;
+  height: var(--space-7);
+  gap: var(--space-1);
+  padding-inline: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+
+  &[data-popup-open] {
+    color: var(--color-text-secondary);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-text-secondary);
+    }
+  }
+}
+
+.popup {
+  min-width: 16rem;
+}
+
+/* One set of fixed column widths for the header and every row, so the
+   prices line up as columns instead of following each label's length. */
+.columns {
+  display: grid;
+  grid-template-columns: 7rem 3.25rem 3.25rem;
+  align-items: baseline;
+  column-gap: var(--space-3);
+}
+
+.header {
+  padding: var(--space-2) var(--space-2-5) var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.right {
+  text-align: right;
+}
+
+.item {
+  height: auto;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+}
+
+.price {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.footer {
+  padding: var(--space-1-5) var(--space-2-5);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 11px;
+}

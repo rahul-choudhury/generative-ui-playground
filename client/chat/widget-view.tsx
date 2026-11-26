@@ -8,6 +8,7 @@ import type { ClientWidgetPart } from "./use-chat"
 import { WidgetErrorBoundary } from "./widget-error-boundary"
 import { WidgetFallback, WidgetInterrupted } from "./widget-fallback"
 import { useWidgetActions } from "./widget-actions-context"
+import styles from "./widget-view.module.css"
 
 /**
  * Renders any registered widget part through its lifecycle:
@@ -57,7 +58,7 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
     // Stopped (or the stream failed) before the arguments finished.
     if (!isStreaming) {
       return (
-        <div className="flex flex-col gap-2">
+        <div className={styles.stack}>
           {pendingView}
           <WidgetInterrupted label={definition.label} partial={pendingView !== null} />
         </div>
@@ -143,10 +144,10 @@ export function WidgetView({ part, isStreaming, isLatest }: WidgetViewProps) {
 
 function GenericSkeleton() {
   return (
-    <Card className="flex flex-col gap-3 p-4">
-      <Skeleton className="h-4 w-1/3" />
-      <Skeleton className="h-3.5 w-2/3" />
-      <Skeleton className="h-3.5 w-1/2" />
+    <Card className={styles.generic}>
+      <Skeleton className={styles.title} />
+      <Skeleton className={styles.line} style={{ width: "66.667%" }} />
+      <Skeleton className={styles.line} style={{ width: "50%" }} />
     </Card>
   )
 }

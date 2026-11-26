@@ -1,9 +1,9 @@
-import { cn } from "../../shared/cn"
 import Markdown from "react-markdown"
 import rehypeHighlight from "rehype-highlight"
 import remarkGfm from "remark-gfm"
 import type { ChatMessage, ClientPart } from "./use-chat"
 import { WidgetView } from "./widget-view"
+import styles from "./message.module.css"
 
 /** `isLatest`: the last message in the conversation (widgets in older ones lock). */
 export function Message({ message, isLatest }: { message: ChatMessage; isLatest: boolean }) {
@@ -11,8 +11,8 @@ export function Message({ message, isLatest }: { message: ChatMessage; isLatest:
     // Only the text is shown. Widget-state parts on this message are sent to
     // the model (as a note the server writes) but deliberately not displayed.
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-lg bg-surface-soft px-4 py-2.5 text-[15px] leading-7 whitespace-pre-wrap wrap-break-word">
+      <div className={styles.userRow}>
+        <div className={styles.bubble}>
           {message.parts.map((part) => (part.type === "text" ? part.text : null))}
         </div>
       </div>
@@ -22,7 +22,7 @@ export function Message({ message, isLatest }: { message: ChatMessage; isLatest:
   const isEmpty = message.parts.length === 0
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={styles.assistant}>
       {message.parts.map((part, i) => (
         <PartView
           key={part.type === "widget" ? part.id : i}
@@ -35,11 +35,11 @@ export function Message({ message, isLatest }: { message: ChatMessage; isLatest:
       {message.status === "streaming" && isEmpty && <TypingIndicator />}
 
       {message.status === "stopped" && (
-        <p className="text-sm text-text-muted">Stopped.</p>
+        <p className={styles.stopped}>Stopped.</p>
       )}
 
       {message.status === "error" && (
-        <p className="rounded-md border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
+        <p className={styles.error}>
           {message.error ?? "Something went wrong."}
         </p>
       )}
@@ -74,11 +74,11 @@ function PartView(props: { part: ClientPart; isStreaming: boolean; isLatest: boo
 
 function TypingIndicator() {
   return (
-    <div className="flex h-7 items-center gap-1" aria-label="Assistant is responding">
+    <div className={styles.typing} aria-label="Assistant is responding">
       {[0, 150, 300].map((delay) => (
         <span
           key={delay}
-          className={cn("size-1.5 animate-pulse rounded-full bg-text-muted")}
+          className={styles.dot}
           style={{ animationDelay: `${delay}ms` }}
         />
       ))}

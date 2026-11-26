@@ -1,0 +1,27 @@
+.form {
+  width: 100%;
+  max-width: var(--layout-container);
+  margin-inline: auto;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.box {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+
+  &:focus-within {
+    border-color: var(--color-border-strong);
+  }
+}
+
+.textarea {
+  max-height: 12rem;
+  resize: none;
+  field-sizing: content;
+}
