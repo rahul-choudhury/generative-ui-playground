@@ -38,21 +38,8 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
-}
 
-:root {
-  --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
-}
-
-#root {
-  isolation: isolate;
-}
-
-@theme {
-
-  /* Widget rows arriving while arguments stream. Timing comes from the
-     library's motion tokens; use with motion-safe: so reduced-motion users
-     get rows that simply appear. */
+  /* Widget rows arriving while arguments stream. */
   --animate-row-in: row-in var(--duration-normal) var(--ease-out-quint) both;
 
   @keyframes row-in {
@@ -63,118 +50,148 @@
   }
 }
 
-/* Tailwind only scans the Vite root (client/) by default; widget components
-   live outside it, so their classes must be added explicitly. */
+/* TEMPORARY: Tailwind only scans the Vite root (client/) by default; widget
+   components live outside it, so their classes must be added explicitly. */
 @source "../widgets";
 
-@layer base {
+:root {
+  --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
+}
 
-  html,
-  body,
-  #root {
-    height: 100%;
-  }
+html,
+body,
+#root {
+  height: 100%;
+}
 
-  body {
-    @apply bg-bg font-sans text-text antialiased;
-  }
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  isolation: isolate;
 }
 
 /* Markdown inside assistant messages. Uses only the library's tokens. */
-@layer components {
-  .markdown {
-    @apply text-[15px] leading-7 wrap-break-word;
+.markdown {
+  font-size: 15px;
+  line-height: var(--space-7);
+  overflow-wrap: break-word;
 
-    &> :first-child {
-      @apply mt-0;
-    }
+  & > :first-child {
+    margin-top: 0;
+  }
 
-    &> :last-child {
-      @apply mb-0;
-    }
+  & > :last-child {
+    margin-bottom: 0;
+  }
 
-    & p,
-    & ul,
-    & ol,
-    & pre,
-    & table,
-    & blockquote {
-      @apply my-3;
-    }
+  & :is(p, ul, ol, pre, table, blockquote) {
+    margin-block: var(--space-3);
+  }
 
-    & h1,
-    & h2,
-    & h3,
-    & h4 {
-      @apply mt-6 mb-2 font-semibold leading-snug;
-    }
+  & :is(h1, h2, h3, h4) {
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-2);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.375;
+  }
 
-    & h1 {
-      @apply text-xl;
-    }
+  & h1 {
+    font-size: var(--text-xl);
+  }
 
-    & h2 {
-      @apply text-lg;
-    }
+  & h2 {
+    font-size: var(--text-lg);
+  }
 
-    & h3,
-    & h4 {
-      @apply text-base;
-    }
+  & :is(h3, h4) {
+    font-size: var(--text-base);
+  }
 
-    & ul {
-      @apply list-disc pl-6;
-    }
+  & :is(ul, ol) {
+    padding-left: var(--space-6);
+  }
 
-    & ol {
-      @apply list-decimal pl-6;
-    }
+  & ul {
+    list-style: disc;
+  }
 
-    & li {
-      @apply my-1;
-    }
+  & ol {
+    list-style: decimal;
+  }
 
-    & li>ul,
-    & li>ol {
-      @apply my-1;
-    }
+  & li,
+  & li > :is(ul, ol) {
+    margin-block: var(--space-1);
+  }
 
-    & a {
-      @apply underline underline-offset-2 hover:text-text-secondary;
-    }
+  & a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
 
-    & strong {
-      @apply font-semibold;
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-text-secondary);
+      }
     }
+  }
 
-    & hr {
-      @apply my-6 border-border;
-    }
+  & strong {
+    font-weight: var(--font-weight-semibold);
+  }
 
-    & blockquote {
-      @apply border-l-2 border-border-strong pl-4 text-text-secondary;
-    }
+  & hr {
+    margin-block: var(--space-6);
+    border: 0;
+    border-top: 1px solid var(--color-border);
+  }
 
-    & :not(pre)>code {
-      @apply rounded-sm bg-surface-soft px-1.5 py-0.5 font-mono text-[0.875em];
-    }
+  & blockquote {
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--color-border-strong);
+    color: var(--color-text-secondary);
+  }
 
-    & pre {
-      @apply overflow-x-auto rounded-md border border-border bg-surface p-4 font-mono text-[13px] leading-6;
-    }
+  & :not(pre) > code {
+    padding: var(--space-0-5) var(--space-1-5);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-soft);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
 
-    & table {
-      @apply block w-full overflow-x-auto border-collapse text-sm;
-    }
+  & pre {
+    overflow-x: auto;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: var(--space-6);
+  }
 
-    & th,
-    & td {
-      @apply border border-border px-3 py-1.5 text-left;
-    }
+  & table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line-height);
+  }
 
-    & th {
-      @apply bg-surface-soft font-semibold;
-    }
+  & :is(th, td) {
+    padding: var(--space-1-5) var(--space-3);
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  & th {
+    background: var(--color-surface-soft);
+    font-weight: var(--font-weight-semibold);
   }
 }
 
@@ -185,78 +202,79 @@
  * data-theme and the OS preference. Plain code text, emphasis and
  * substitutions use the library's own `text` colour instead of GitHub's.
  */
-@theme {
-  --color-syntax-keyword: light-dark(#d73a49, #ff7b72);
-  --color-syntax-title: light-dark(#6f42c1, #d2a8ff);
-  --color-syntax-constant: light-dark(#005cc5, #79c0ff);
-  --color-syntax-string: light-dark(#032f62, #a5d6ff);
-  --color-syntax-builtin: light-dark(#e36209, #ffa657);
-  --color-syntax-comment: light-dark(#6a737d, #8b949e);
-  --color-syntax-tag: light-dark(#22863a, #7ee787);
-  --color-syntax-section: light-dark(#005cc5, #1f6feb);
-  --color-syntax-bullet: light-dark(#735c0f, #f2cc60);
-  --color-syntax-addition: light-dark(#22863a, #aff5b4);
-  --color-syntax-addition-bg: light-dark(#f0fff4, #033a16);
-  --color-syntax-deletion: light-dark(#b31d28, #ffdcd7);
-  --color-syntax-deletion-bg: light-dark(#ffeef0, #67060c);
+:root {
+  --syntax-keyword: light-dark(#d73a49, #ff7b72);
+  --syntax-title: light-dark(#6f42c1, #d2a8ff);
+  --syntax-constant: light-dark(#005cc5, #79c0ff);
+  --syntax-string: light-dark(#032f62, #a5d6ff);
+  --syntax-builtin: light-dark(#e36209, #ffa657);
+  --syntax-comment: light-dark(#6a737d, #8b949e);
+  --syntax-tag: light-dark(#22863a, #7ee787);
+  --syntax-section: light-dark(#005cc5, #1f6feb);
+  --syntax-bullet: light-dark(#735c0f, #f2cc60);
+  --syntax-addition: light-dark(#22863a, #aff5b4);
+  --syntax-addition-bg: light-dark(#f0fff4, #033a16);
+  --syntax-deletion: light-dark(#b31d28, #ffdcd7);
+  --syntax-deletion-bg: light-dark(#ffeef0, #67060c);
 }
 
-@layer components {
-  .markdown pre code {
-    & :is(.hljs-doctag, .hljs-keyword, .hljs-meta .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_) {
-      @apply text-syntax-keyword;
-    }
+.markdown pre code {
+  & :is(.hljs-doctag, .hljs-keyword, .hljs-meta .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_) {
+    color: var(--syntax-keyword);
+  }
 
-    & :is(.hljs-title, .hljs-title.class_, .hljs-title.function_) {
-      @apply text-syntax-title;
-    }
+  & :is(.hljs-title, .hljs-title.class_, .hljs-title.function_) {
+    color: var(--syntax-title);
+  }
 
-    & :is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id) {
-      @apply text-syntax-constant;
-    }
+  & :is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id) {
+    color: var(--syntax-constant);
+  }
 
-    & :is(.hljs-regexp, .hljs-string, .hljs-meta .hljs-string) {
-      @apply text-syntax-string;
-    }
+  & :is(.hljs-regexp, .hljs-string, .hljs-meta .hljs-string) {
+    color: var(--syntax-string);
+  }
 
-    & :is(.hljs-built_in, .hljs-symbol) {
-      @apply text-syntax-builtin;
-    }
+  & :is(.hljs-built_in, .hljs-symbol) {
+    color: var(--syntax-builtin);
+  }
 
-    & :is(.hljs-comment, .hljs-code, .hljs-formula) {
-      @apply text-syntax-comment;
-    }
+  & :is(.hljs-comment, .hljs-code, .hljs-formula) {
+    color: var(--syntax-comment);
+  }
 
-    & :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) {
-      @apply text-syntax-tag;
-    }
+  & :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) {
+    color: var(--syntax-tag);
+  }
 
-    & .hljs-section {
-      @apply font-bold text-syntax-section;
-    }
+  & .hljs-section {
+    color: var(--syntax-section);
+    font-weight: var(--font-weight-bold);
+  }
 
-    & .hljs-bullet {
-      @apply text-syntax-bullet;
-    }
+  & .hljs-bullet {
+    color: var(--syntax-bullet);
+  }
 
-    & .hljs-subst {
-      @apply text-text;
-    }
+  & :is(.hljs-subst, .hljs-emphasis, .hljs-strong) {
+    color: var(--color-text);
+  }
 
-    & .hljs-emphasis {
-      @apply text-text italic;
-    }
+  & .hljs-emphasis {
+    font-style: italic;
+  }
 
-    & .hljs-strong {
-      @apply text-text font-bold;
-    }
+  & .hljs-strong {
+    font-weight: var(--font-weight-bold);
+  }
 
-    & .hljs-addition {
-      @apply bg-syntax-addition-bg text-syntax-addition;
-    }
+  & .hljs-addition {
+    background-color: var(--syntax-addition-bg);
+    color: var(--syntax-addition);
+  }
 
-    & .hljs-deletion {
-      @apply bg-syntax-deletion-bg text-syntax-deletion;
-    }
+  & .hljs-deletion {
+    background-color: var(--syntax-deletion-bg);
+    color: var(--syntax-deletion);
   }
 }
