@@ -42,7 +42,6 @@ body {
   isolation: isolate;
 }
 
-/* Visually hidden, still read by screen readers. */
 .sr-only {
   position: absolute;
   width: 1px;

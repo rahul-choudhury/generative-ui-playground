@@ -141,8 +141,6 @@
   line-height: var(--text-sm-line-height);
 }
 
-/* Skeleton */
-
 .skeletonHeader {
   display: flex;
   align-items: flex-end;
