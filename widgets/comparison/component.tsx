@@ -1,7 +1,7 @@
-import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
+import styles from "./comparison.module.css"
 import type { ComparisonArgs } from "./definition"
 
 /**
@@ -37,60 +37,48 @@ export function ComparisonPending({ partial, interrupted = false }: { partial: u
 type LayoutProps = ComparisonArgs & { pending?: boolean }
 
 function ComparisonLayout({ title, subjects, rows, verdict, pending = false }: LayoutProps) {
-  const enter = cn(pending && "motion-safe:animate-row-in")
-
   return (
     <Card
-      className="overflow-hidden"
+      className={styles.card}
+      data-pending={pending || undefined}
       role="region"
       aria-label={subjects.length ? `Comparison of ${subjects.join(", ")}` : "Comparison"}
       aria-busy={pending || undefined}
     >
-      {title && <p className="px-5 pt-4 text-sm text-text-muted sm:px-6">{title}</p>}
+      {title && <p className={styles.title}>{title}</p>}
 
-      {/* Wide tables scroll sideways in narrow chats; the attribute column
-          stays pinned so each row keeps its label. */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+      <div className={styles.scroller}>
+        <table className={styles.table}>
           <thead>
             <tr>
-              <th scope="col" className="sticky left-0 bg-surface" aria-label="Attribute" />
+              <th scope="col" className={styles.corner} aria-label="Attribute" />
               {subjects.length > 0
                 ? subjects.map((subject, i) => (
-                    <th
-                      key={i}
-                      scope="col"
-                      className="min-w-32 px-4 pt-4 pb-3 text-left align-bottom font-serif text-xl leading-tight font-semibold"
-                    >
+                    <th key={i} scope="col" className={styles.subject}>
                       {subject}
                     </th>
                   ))
                 : [0, 1].map((i) => (
-                    <th key={i} className="px-4 pt-4 pb-3">
-                      <Skeleton className="h-5 w-24" />
+                    <th key={i} className={styles.subjectSkeletonCell}>
+                      <Skeleton className={styles.subjectSkeleton} />
                     </th>
                   ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((row, r) => (
-              <tr key={r} className={cn("border-t border-border", enter)}>
-                <th
-                  scope="row"
-                  className="sticky left-0 bg-surface py-2.5 pr-3 pl-5 text-left align-top font-normal whitespace-nowrap text-text-muted sm:pl-6"
-                >
+              <tr key={r} className={`${styles.row} ${styles.enter}`}>
+                <th scope="row" className={styles.attribute}>
                   {row.label}
                 </th>
                 {subjects.map((_, i) => {
                   const isBest = row.best === i
                   return (
-                    <td key={i} className={cn("px-4 py-2.5 align-top", isBest && "font-medium")}>
+                    <td key={i} className={styles.value} data-best={isBest || undefined}>
                       {row.values[i]}
                       {isBest && (
                         <>
-                          {/* A quiet mark rather than a colour: readable in
-                              both themes and to screen readers. */}
-                          <span aria-hidden className="ml-1.5 inline-block size-1.5 -translate-y-px rounded-full bg-text align-middle" />
+                          <span aria-hidden className={styles.mark} />
                           <span className="sr-only"> (better)</span>
                         </>
                       )}
@@ -103,28 +91,24 @@ function ComparisonLayout({ title, subjects, rows, verdict, pending = false }: L
         </table>
       </div>
 
-      {verdict && (
-        <p className={cn("border-t border-border px-5 py-3.5 font-serif text-[1.05rem] leading-snug sm:px-6", enter)}>
-          {verdict}
-        </p>
-      )}
+      {verdict && <p className={`${styles.verdict} ${styles.enter}`}>{verdict}</p>}
     </Card>
   )
 }
 
 export function ComparisonSkeleton() {
   return (
-    <Card className="overflow-hidden">
-      <div className="flex gap-8 px-5 pt-4 pb-3 sm:px-6">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-5 w-24" />
-        <Skeleton className="h-5 w-24" />
+    <Card className={styles.card}>
+      <div className={styles.skeletonHead}>
+        <Skeleton className={styles.skeletonLabel} />
+        <Skeleton className={styles.subjectSkeleton} />
+        <Skeleton className={styles.subjectSkeleton} />
       </div>
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex gap-8 border-t border-border px-5 py-3 sm:px-6">
-          <Skeleton className="h-3.5 w-20" />
-          <Skeleton className="h-3.5 w-28" />
-          <Skeleton className="h-3.5 w-28" />
+        <div key={i} className={styles.skeletonRow}>
+          <Skeleton className={styles.skeletonAttribute} />
+          <Skeleton className={styles.skeletonValue} />
+          <Skeleton className={styles.skeletonValue} />
         </div>
       ))}
     </Card>

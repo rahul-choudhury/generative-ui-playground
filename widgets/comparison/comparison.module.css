@@ -1,0 +1,153 @@
+.card {
+  overflow: hidden;
+}
+
+/* Rows only animate while pending; the finished table mounts without it. */
+.card[data-pending] .enter {
+  animation: var(--row-in);
+}
+
+.title {
+  padding: var(--space-4) var(--space-5) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+
+  @media (width >= 40rem) {
+    padding-inline: var(--space-6);
+  }
+}
+
+/* Wide tables scroll sideways in narrow chats; the attribute column stays
+   pinned so each row keeps its label. */
+.scroller {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.corner {
+  position: sticky;
+  left: 0;
+  background: var(--color-surface);
+}
+
+.subject {
+  min-width: 8rem;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+  text-align: left;
+  vertical-align: bottom;
+}
+
+.subjectSkeletonCell {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.subjectSkeleton {
+  width: 6rem;
+  height: var(--space-5);
+}
+
+.row {
+  border-top: 1px solid var(--color-border);
+}
+
+.attribute {
+  position: sticky;
+  left: 0;
+  padding: var(--space-2-5) var(--space-3) var(--space-2-5) var(--space-5);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+
+  @media (width >= 40rem) {
+    padding-left: var(--space-6);
+  }
+}
+
+.value {
+  padding: var(--space-2-5) var(--space-4);
+  vertical-align: top;
+
+  &[data-best] {
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+/* A quiet mark rather than a colour: readable in both themes and to screen
+   readers. */
+.mark {
+  display: inline-block;
+  width: var(--space-1-5);
+  height: var(--space-1-5);
+  margin-left: var(--space-1-5);
+  border-radius: 9999px;
+  background: var(--color-text);
+  vertical-align: middle;
+  translate: 0 -1px;
+}
+
+.verdict {
+  padding: var(--space-3-5) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.375;
+
+  @media (width >= 40rem) {
+    padding-inline: var(--space-6);
+  }
+}
+
+/* Skeleton */
+
+.skeletonHead,
+.skeletonRow {
+  display: flex;
+  gap: var(--space-8);
+  padding-inline: var(--space-5);
+
+  @media (width >= 40rem) {
+    padding-inline: var(--space-6);
+  }
+}
+
+.skeletonHead {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-3);
+}
+
+.skeletonRow {
+  padding-block: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.skeletonLabel {
+  width: 5rem;
+  height: var(--space-4);
+}
+
+.skeletonAttribute,
+.skeletonValue {
+  height: var(--space-3-5);
+}
+
+.skeletonAttribute {
+  width: 5rem;
+}
+
+.skeletonValue {
+  width: 7rem;
+}

@@ -1,0 +1,199 @@
+/* Narrower than the chat column: an entry, not a table. Keeps the dotted
+   leaders short enough to guide the eye. A container, so fact rows adapt to
+   the card's width rather than the viewport's. */
+.card {
+  max-width: 36rem;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  container-type: inline-size;
+
+  @media (width >= 40rem) {
+    padding-inline: var(--space-6);
+  }
+}
+
+/* Rows only animate while pending; the finished card mounts without it. */
+.card[data-pending] .enter {
+  animation: var(--row-in);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-8);
+}
+
+.name {
+  min-width: 0;
+}
+
+.subject {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.subjectSkeleton {
+  width: 9rem;
+  height: var(--space-7);
+  margin-block: var(--space-1-5);
+}
+
+.descriptor {
+  color: var(--color-text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-style: italic;
+  line-height: 1.375;
+}
+
+.headline {
+  @container (width >= 24rem) {
+    text-align: right;
+  }
+}
+
+/* The serif's digits are lining by default. Proportional (not tabular)
+   spacing: tnum spreads "14.18M" apart at this size. */
+.headlineValue {
+  font-family: var(--font-serif);
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.headlineLabel {
+  margin-top: var(--space-1-5);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+}
+
+.facts {
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+/* Narrow card: label above value, no leader. From 24rem up: one line,
+   label …… value. Leaders need room to read as leaders. */
+.fact {
+  display: flex;
+  flex-direction: column;
+  padding-block: var(--space-1-5);
+
+  @container (width >= 24rem) {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-block: calc(var(--space-2-5) / 2);
+  }
+}
+
+/* The leader is the dt's ::after, so the markup stays a valid dt/dd pair and
+   screen readers never see it. Labels don't wrap, so the leader always sits
+   on the label's line. */
+.label {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+
+  @container (width >= 24rem) {
+    display: flex;
+    flex: 1;
+    align-items: baseline;
+    gap: var(--space-2);
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line-height);
+    white-space: nowrap;
+
+    &::after {
+      content: "";
+      min-width: var(--space-6);
+      flex: 1;
+      border-bottom: 1px dotted var(--color-border-strong);
+      translate: 0 -0.3em;
+    }
+  }
+}
+
+.value {
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+
+  @container (width >= 24rem) {
+    max-width: 60%;
+    text-align: right;
+  }
+}
+
+.asOf {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-style: italic;
+  line-height: var(--text-sm-line-height);
+}
+
+/* Skeleton */
+
+.skeletonHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.skeletonName {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeletonRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.skeletonRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.skeletonSubject {
+  width: 9rem;
+  height: var(--space-7);
+}
+
+.skeletonDescriptor {
+  width: 7rem;
+  height: var(--space-4);
+}
+
+.skeletonHeadline {
+  width: 5rem;
+  height: var(--space-8);
+}
+
+.skeletonLabel,
+.skeletonValue {
+  height: var(--space-3-5);
+}
+
+.skeletonLabel {
+  width: 6rem;
+}
+
+.skeletonValue {
+  width: 4rem;
+}

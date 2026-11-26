@@ -1,0 +1,158 @@
+.card {
+  max-width: 36rem;
+  overflow: hidden;
+}
+
+.head {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.question {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  line-height: 1.375;
+  text-wrap: balance;
+}
+
+.questionSkeleton {
+  width: 66.667%;
+  height: var(--space-5);
+  margin-block: var(--space-1);
+}
+
+.options {
+  border-top: 1px solid var(--color-border);
+}
+
+.option {
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  .card[data-pending] & {
+    animation: var(--row-in);
+  }
+}
+
+.button {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-out-quad);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  &:enabled {
+    cursor: pointer;
+
+    @media (hover: hover) {
+      &:hover {
+        background: var(--color-surface-soft);
+      }
+    }
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  /* Once one is picked, it stays highlighted and the rest fade back. */
+  &[aria-pressed="true"] {
+    background: var(--color-surface-soft);
+  }
+
+  &[aria-pressed="false"] {
+    color: var(--color-text-muted);
+  }
+}
+
+.number {
+  display: flex;
+  width: var(--space-4);
+  flex-shrink: 0;
+  justify-content: center;
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  color: var(--color-text);
+}
+
+.text {
+  min-width: 0;
+  flex: 1;
+}
+
+.label {
+  display: block;
+  font-size: 15px;
+  font-weight: var(--font-weight-medium);
+  line-height: var(--space-6);
+}
+
+.description {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--space-5);
+}
+
+/* Hover affordance, only while picking is possible. */
+.arrow {
+  flex-shrink: 0;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  opacity: 0;
+  translate: calc(var(--space-1) * -1) 0;
+  transition-property: opacity, translate;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-out-quint);
+
+  @media (hover: hover) {
+    .button:enabled:hover & {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    translate: 0 0;
+  }
+}
+
+/* Skeleton */
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3-5) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.skeletonBox {
+  width: var(--space-3-5);
+  height: var(--space-3-5);
+  border-radius: var(--radius-sm);
+}
+
+.skeletonLine {
+  height: var(--space-3-5);
+}

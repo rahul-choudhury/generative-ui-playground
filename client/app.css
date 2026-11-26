@@ -56,6 +56,18 @@
 
 :root {
   --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
+
+  /* Widget rows arriving while arguments stream. Global, so every widget's
+     CSS Module can use it: `animation: var(--row-in)`. The library's reset
+     makes it instant for reduced-motion users. */
+  --row-in: row-in var(--duration-normal) var(--ease-out-quint) both;
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 html,

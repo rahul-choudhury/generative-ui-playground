@@ -1,8 +1,8 @@
-import { cn } from "../../shared/cn"
 import { Card, Checkbox, Skeleton } from "@rahul-choudhury/ui/components"
 import Markdown from "react-markdown"
 import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
+import styles from "./checklist.module.css"
 import type { ChecklistArgs, ChecklistState } from "./definition"
 
 /**
@@ -62,45 +62,34 @@ function ChecklistLayout({ title, labels, checked, onToggle, pending = false, in
 
   return (
     <Card
-      className="overflow-hidden"
+      className={styles.card}
+      data-pending={pending || undefined}
       role="region"
       aria-label={title ?? "Checklist"}
       aria-busy={(pending && !interrupted) || undefined}
     >
-      <div className="flex items-baseline justify-between gap-4 border-b border-border px-4 py-3">
+      <div className={styles.header}>
         {title !== undefined ? (
-          <h3 className="font-semibold">{title}</h3>
+          <h3 className={styles.title}>{title}</h3>
         ) : (
-          <Skeleton className="h-4 w-40 self-center" />
+          <Skeleton className={styles.titleSkeleton} />
         )}
-        <span className="shrink-0 text-xs text-text-muted tabular-nums">
+        <span className={styles.count}>
           {done}/{labels.length}
         </span>
       </div>
 
-      <ul className="flex flex-col py-1.5">
+      <ul className={styles.list}>
         {labels.map((label, i) => (
-          // Rows only animate while pending. The finished checklist mounts
-          // fresh with no animation, so nothing flashes at the handover.
-          <li key={i} className={cn(pending && "motion-safe:animate-row-in")}>
-            <label
-              className={cn(
-                "flex items-start gap-3 px-4 py-1.5",
-                !pending && "cursor-pointer hover:bg-surface-soft"
-              )}
-            >
+          <li key={i} className={styles.row}>
+            <label className={styles.item}>
               <Checkbox
                 checked={checked[i]}
                 disabled={pending}
                 onCheckedChange={(value) => onToggle?.(i, value)}
-                className="mt-1"
+                className={styles.checkbox}
               />
-              <span
-                className={cn(
-                  "text-[15px] leading-6 transition-colors",
-                  checked[i] && "text-text-muted line-through"
-                )}
-              >
+              <span className={styles.label} data-checked={checked[i] || undefined}>
                 <InlineMarkdown text={label} />
               </span>
             </label>
@@ -119,14 +108,14 @@ const inlineElements = ["p", "code", "strong", "em", "del", "a"]
 const inlineComponents = {
   p: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   code: ({ children }: { children?: React.ReactNode }) => (
-    <code className="rounded-sm bg-surface-soft px-1 py-0.5 font-mono text-[0.85em]">{children}</code>
+    <code className={styles.code}>{children}</code>
   ),
   a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="underline underline-offset-2"
+      className={styles.link}
       onClick={(e) => e.stopPropagation()} // following a link shouldn't tick the item
     >
       {children}
