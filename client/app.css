@@ -4,8 +4,7 @@
 
 /* Self-hosted so it looks the same on every platform (the library's serif
    stack resolves to Georgia, New York or a Linux default depending on the
-   browser). Libre Caslon Condensed: a narrow Caslon with lining figures by
-   default. Only the weights/styles in use are loaded. */
+   browser). */
 @import "@fontsource/libre-caslon-condensed/400.css";
 @import "@fontsource/libre-caslon-condensed/400-italic.css";
 @import "@fontsource/libre-caslon-condensed/600.css";
