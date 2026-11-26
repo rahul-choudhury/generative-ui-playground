@@ -1,5 +1,5 @@
 import { ArrowDownIcon } from "@phosphor-icons/react"
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Button } from "@rahul-choudhury/ui/components"
 import { usePrefersReducedMotion } from "@rahul-choudhury/ui/hooks"
 import { useEffect, useRef, useState } from "react"

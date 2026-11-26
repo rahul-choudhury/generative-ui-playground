@@ -14,7 +14,7 @@
     "@base-ui/react": "^1.9.0",
     "@fontsource/libre-caslon-condensed": "^5.3.1",
     "@phosphor-icons/react": "^2.1.10",
-    "@rahul-choudhury/ui": "^0.5.0",
+    "@rahul-choudhury/ui": "^0.6.0",
     "hono": "^4.13.16",
     "openai": "^7.47.0",
     "react": "^19.3.1",

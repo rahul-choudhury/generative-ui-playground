@@ -1,5 +1,7 @@
+@import "@rahul-choudhury/ui/reset.css";
 @import "tailwindcss";
 @import "@rahul-choudhury/ui/tokens.css";
+@import "@rahul-choudhury/ui/styles.css";
 
 /* Self-hosted so it looks the same on every platform (the library's serif
    stack resolves to Georgia, New York or a Linux default depending on the
@@ -9,8 +11,44 @@
 @import "@fontsource/libre-caslon-condensed/400-italic.css";
 @import "@fontsource/libre-caslon-condensed/600.css";
 
-@theme {
+/* TEMPORARY while the app moves to CSS Modules: the library's tokens are
+   plain CSS variables since 0.6, so point Tailwind's utility names at them.
+   Removed together with Tailwind. */
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-soft: var(--color-surface-soft);
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+  --color-success: var(--color-success);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --ease-out-quint: var(--ease-out-quint);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
   --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
+}
+
+:root {
+  --font-serif: "Libre Caslon Condensed", ui-serif, georgia, serif;
+}
+
+#root {
+  isolation: isolate;
+}
+
+@theme {
 
   /* Widget rows arriving while arguments stream. Timing comes from the
      library's motion tokens; use with motion-safe: so reduced-motion users

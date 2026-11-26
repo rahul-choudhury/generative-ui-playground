@@ -1,4 +1,4 @@
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import Markdown from "react-markdown"
 import rehypeHighlight from "rehype-highlight"
 import remarkGfm from "remark-gfm"

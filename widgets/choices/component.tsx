@@ -1,5 +1,5 @@
 import { ArrowRightIcon, CheckIcon } from "@phosphor-icons/react"
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import { useId } from "react"
 import type { WidgetProps } from "../define"

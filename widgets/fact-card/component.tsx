@@ -1,4 +1,4 @@
-import { cn } from "@rahul-choudhury/ui"
+import { cn } from "../../shared/cn"
 import { Card, Skeleton } from "@rahul-choudhury/ui/components"
 import type { WidgetProps } from "../define"
 import { asArray, asObject, asString } from "../partial"
